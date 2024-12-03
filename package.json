@@ -6,27 +6,43 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "version": "node version-bump.mjs && git add manifest.json versions.json"
+    "version": "node version-bump.mjs && git add manifest.json versions.json",
+    "lex": "tsx src/tools/yaml2json -i \"./lexicons-src/*.yml\" -o \"./lexicons\"; lex-cli generate -o ./src/lexicon/lexicons.ts ./lexicons/*; lex-cli generate-main -o ./src/lexicon/index.ts ./lexicons/*"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@atproto/lex-cli": "^0.5.2",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/express": "^5.0.0",
+    "@types/mime-db": "^1.43.5",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "esbuild": "^0.24.0",
+    "esbuild-svelte": "^0.9.0",
     "eslint": "^9.16.0",
-    "typescript": "5.8.0-dev.20241201"
+    "glob": "^11.0.0",
+    "svelte-preprocess": "^6.0.3",
+    "tsx": "^4.19.2",
+    "typescript": "5.8.0-dev.20241201",
+    "yaml": "^2.6.1"
   },
   "dependencies": {
+    "@atcute/cid": "^1.0.2",
+    "@atcute/client": "^2.0.6",
+    "@atcute/lex-cli": "^1.0.3",
     "@atproto/api": "^0.13.18",
     "@atproto/common": "^0.4.4",
     "@atproto/identity": "^0.4.3",
+    "@atproto/jwk-jose": "^0.1.2",
     "@atproto/lexicon": "^0.4.3",
     "@atproto/oauth-client-browser": "^0.3.2",
+    "@atproto/oauth-client-node": "^0.2.2",
     "@atproto/sync": "^0.1.6",
     "@atproto/syntax": "^0.3.1",
+    "@atproto/xrpc-server": "^0.7.3",
     "@noble/ciphers": "^1.1.3",
     "@noble/curves": "^1.7.0",
     "@noble/hashes": "^1.6.1",
@@ -36,7 +52,13 @@
     "buffer": "^6.0.3",
     "builtin-modules": "^4.0.0",
     "crockford-base32": "^2.0.0",
+    "esbuild-plugins-node-modules-polyfill": "^1.6.8",
+    "express": "^4.21.1",
+    "mime-db": "^1.53.0",
+    "mime-type": "^5.0.0",
+    "multiformats": "^13.3.1",
     "obsidian": "^1.7.2",
+    "svelte": "^5.4.0",
     "tslib": "^2.8.1"
   }
 }

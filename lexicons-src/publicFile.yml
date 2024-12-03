@@ -1,0 +1,45 @@
+lexicon: 1
+id: io.github.obsidat.publicFile
+defs:
+  main:
+    type: record
+    key: any
+    description: >-
+      An Obsidian file, publicly accessible with no encryption.
+      Record Key is blake3 hash of `filePath || ':' || vaultName`
+    record:
+      type: object
+      required:
+        - recordCreatedAt
+        - fileLastCreatedOrModified
+        - body
+        - vaultName
+        - filePath
+      properties:
+        body:
+          type: blob
+          description: The contents of the file.
+        vaultName:
+          type: string
+          description: The name of the vault the file is stored in.
+        filePath:
+          type: string
+          description: The path to the file inside the vault.
+        title:
+          type: string
+          description: A descriptive title for the file, if any.
+        frontmatter:
+          type: array
+          items:
+            type: ref
+            ref: io.github.obsidat.generic#keyValuePair
+          description: >-
+            The Markdown frontmatter, serialized as an array of keyValuePair objects.
+            Will be `undefined` for non-Markdown or non-textual files.
+        recordCreatedAt:
+          type: string
+          format: datetime
+          description: This record's creation date.
+        fileLastCreatedOrModified:
+          type: string
+          description: The file's creation or modification date.

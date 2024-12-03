@@ -1,6 +1,9 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import esbuildSvelte from 'esbuild-svelte';
+import { sveltePreprocess } from 'svelte-preprocess';
+import { nodeModulesPolyfillPlugin } from 'esbuild-plugins-node-modules-polyfill';
 
 const banner =
 `/*
@@ -15,7 +18,20 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["src/index.ts"],
+	plugins: [
+		esbuildSvelte({
+			compilerOptions: { css: true },
+			preprocess: sveltePreprocess(),
+		}),
+		nodeModulesPolyfillPlugin({
+			globals: {
+				process: true,
+				Buffer: true,
+			},
+			modules: ['buffer'],
+		}),
+	],
+	entryPoints: ["src/index.tsx"],
 	bundle: true,
 	external: [
 		"obsidian",
@@ -33,12 +49,14 @@ const context = await esbuild.context({
 		"@lezer/lr",
 		...builtins],
 	format: "cjs",
-	target: "es2018",
+	target: "es2020", // TODO drop to es2018, loses bigint
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "out/index.js",
 	minify: prod,
+
+	platform: 'node',
 });
 
 if (prod) {

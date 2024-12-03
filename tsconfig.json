@@ -1,7 +1,8 @@
 {
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "inlineSourceMap": true,
+    "types": ["svelte", "node"],
+    "rootDir": "./src",
     "inlineSources": true,
     "module": "ESNext",
     "target": "ES6",
@@ -19,10 +20,16 @@
     ],
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
-    "declaration": true
+    "declaration": true,
+    "verbatimModuleSyntax": false, // required for lex-cli
+    "paths": {
+      "@lexicon/*": ["./lexicon/types/*"],
+      "@jsx": ["./src/createElement-tsx.ts"]
+    },
+    "allowArbitraryExtensions": false,
+    "jsx": "react",
+    "jsxFactory": "h"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": ["node_modules"]
+  "include": [ "src/**/*.ts", "src/**/*.tsx" ],
+  "exclude": ["node_modules"],
 }

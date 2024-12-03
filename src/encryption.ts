@@ -4,18 +4,21 @@ import { randomBytes } from '@noble/hashes/utils';
 import { encode as encode85, decode as decode85 } from 'base85';
 import { toBuffer } from './utils.ts';
 
-export async function encryptData(data: Uint8Array) {
-    const passphrase = CrockfordBase32.encode(toBuffer(randomBytes(256 / 8))); // 256 bits of entropy
+export function generatePassphrase() {
+    return CrockfordBase32.encode(toBuffer(randomBytes(256 / 8))); // 256 bits of entropy
+}
+
+export async function encryptData(data: Uint8Array, passphrase?: string) {
+    passphrase ??= generatePassphrase();
 
     const e = new Encrypter();
     e.setPassphrase(passphrase);
     const { header, nonce, payload } = await e.encryptAsParts(data);
     
-    return { passphrase, header: new TextDecoder().decode(header), nonce: encode85(toBuffer(nonce)), payload };
+    return { passphrase, header: new TextDecoder().decode(header), nonce: toBuffer(nonce), payload };
 }
 
-export async function decryptData({ passphrase, header: headerText, nonce, payload }: {
-    passphrase: string;
+export async function decryptData(passphrase: string, { header: headerText, nonce, payload }: {
     header: string;
     nonce: Uint8Array;
     payload: Uint8Array;
