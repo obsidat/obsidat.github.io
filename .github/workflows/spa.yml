@@ -60,7 +60,7 @@ jobs:
       - name: Build SPA
         run: |
           cd spa
-          vite build
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
