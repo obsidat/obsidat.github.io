@@ -8,7 +8,7 @@ import { h } from '@jsx';
 
 import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
-import { ATMOSPHERE_CLIENT, Awaitable } from "./utils.ts";
+import { ATMOSPHERE_CLIENT, Awaitable, hashFileName } from "./utils.ts";
 import { doPush } from "./sync/push.ts";
 import { getLocalFileRkey } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
@@ -110,7 +110,7 @@ export default class MyPlugin extends Plugin {
 				}
 
 				window.open(
-					`${ATMOSPHERE_CLIENT}/private-page/${this.settings.bskyHandle}/${getLocalFileRkey(activeFile, this.settings)}/${this.settings.passphrase}`,
+					`${ATMOSPHERE_CLIENT}/private-page/${encodeURI(this.settings.bskyHandle!)}/${hashFileName(getLocalFileRkey(activeFile, this.settings))}/${encodeURI(this.settings.passphrase)}`,
 					'_blank',
 					'noopener,noreferrer',
 				);
