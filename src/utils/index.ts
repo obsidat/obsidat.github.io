@@ -1,5 +1,14 @@
 import { XRPC, XRPCResponse } from "@atcute/client";
 import type { At, Brand, ComAtprotoRepoListRecords, IoGithubObsidatGeneric, IoGithubObsidatPublicFile, Records } from "@atcute/client/lexicons";
+import { type DuplicationProcessWay, type IMimeTypes, MimeType } from 'mime-type';
+import db from 'mime-db';
+import { sha256 } from '@noble/hashes/sha256';
+import { parse as parseCid, create as createCid, format as formatCid } from '@atcute/cid';
+import { blake3 } from "@noble/hashes/blake3";
+import { DidDocument } from "@atcute/client/utils/did";
+import base32Encode from 'base32-encode';
+import base32Decode from 'base32-decode';
+import { fromString, toString } from 'uint8arrays';
 
 /*!
 The MIT License (MIT)
@@ -35,7 +44,7 @@ export function toBuffer(arr: ArrayBufferLike) {
 
 export type Awaitable<T> = Awaited<T> | Promise<Awaited<T>>;
 
-interface ListRecordsRecord<K extends keyof Records> {
+export interface ListRecordsRecord<K extends keyof Records> {
     [Brand.Type]?: 'com.atproto.repo.listRecords#record';
     cid: At.CID;
     uri: At.Uri;
@@ -87,25 +96,15 @@ export function truncate(text: string, len = 250) {
     return text.slice(0, len - 3) + '...';
 }
 
-//create an empty mime-type:
-import { type DuplicationProcessWay, type IMimeTypes, MimeType } from 'mime-type';
-import db from 'mime-db';
-const mime = new MimeType(db as IMimeTypes, 0 as DuplicationProcessWay);
-
+let mime: MimeType | undefined;
 export function detectMimeType(pathOrExtension: string) {
+    mime ??= new MimeType(db as IMimeTypes, 0 as DuplicationProcessWay);
+
     let result = mime.lookup(pathOrExtension);
     if (!result) return 'application/octet-stream';
     if (Array.isArray(result)) result = result[0];
     return result;
 }
-
-import { sha256 } from '@noble/hashes/sha256';
-import { parse as parseCid, create as createCid, format as formatCid } from '@atcute/cid';
-import { CrockfordBase32 } from "crockford-base32";
-import { blake3 } from "@noble/hashes/blake3";
-import { DidDocument } from "@atcute/client/utils/did";
-import base32Encode from 'base32-encode';
-import base32Decode from 'base32-decode';
 
 export function isCidMatching(data: ArrayBufferLike, blob: At.Blob) {
     const cid = parseCid(blob.ref.$link);
@@ -210,8 +209,6 @@ export function getHandle(didDoc: DidDocument) {
         ?.find(handle => handle.startsWith('at://'))
         ?.slice('at://'.length);
 }
-
-import { fromString, toString } from 'uint8arrays';
 
 export function arrayBufferToBase64(arrayBuffer: ArrayBufferLike) {
     return toString(new Uint8Array(arrayBuffer), 'base64');
