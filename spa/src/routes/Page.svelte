@@ -11,28 +11,37 @@
         .then(client => client.getAndDecryptFile(rkey, passphrase))
         .then(file => ({
             ...file,
-            textContent: file.mimeType.startsWith('text/')
-                ? new TextDecoder().decode(file.contents)
-                : undefined
+            textContent: typeof file.contents === 'string'
+                ? file.contents
+                : file.mimeType.startsWith('text/')
+                    ? new TextDecoder().decode(file.contents)
+                    : undefined
         }));
 
 </script>
 
-<h1>Lorem ipsum</h1>
-{#await filePromise}
-    <p>Waiting for file</p>
-{:then file} 
-    <p>{file.filePath}</p>
-    {#if file.textContent}
-        {file.textContent}
-    {/if}
-{/await}
+<div class="container">
+    {#await filePromise}
+        <p>Loading file from repo @{handle}</p>
+    {:then file} 
+        <h1>{file.filePath}</h1>
+        {#if file.textContent}
+            <div class="text-content">
+                {file.textContent}
+            </div>
+        {/if}
+    {:catch err}
+        <p>File load error:</p>
+        <pre>{err}</pre>
+    {/await}
+</div>
 
 <style lang="scss">
-    h1 {
-        color: #008cff;
-        text-transform: uppercase;
-        font-size: 4em;
-        font-weight: 100;
+    .container {
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
+    }
+
+    .text-content {
+        white-space: pre;
     }
 </style>

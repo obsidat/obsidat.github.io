@@ -39,7 +39,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         }
     }
 
-    for (const [rkey, remoteFile] of Object.entries(remoteFilesByRkey)) {
+    for (const [rkey, remoteFile] of remoteFilesByRkey.entries()) {
         const localFile = localFilesByRkey.get(rkey)!;
 
         if (localFile) {
@@ -85,5 +85,5 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         }
     }
 
-    new Notice(`Pulled down ${Object.keys(remoteFilesByRkey).length} files from @${settings.bskyHandle}.`);
+    new Notice(`Pulled down ${remoteFilesByRkey.size} files from @${settings.bskyHandle}.`);
 }

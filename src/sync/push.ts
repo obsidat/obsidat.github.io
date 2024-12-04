@@ -35,10 +35,10 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
     console.log(localFilesByRkey);
 
-    new Notice(`Synchronizing ${Object.keys(localFilesByRkey).length} files to remote repo @${settings.bskyHandle}...`);
+    new Notice(`Synchronizing ${localFilesByRkey.size} files to remote repo @${settings.bskyHandle}...`);
 
     if (settings.deleteMissingRemoteFiles) {
-        for (const [rkey, file] of Object.entries(remoteFilesByRkey)) {
+        for (const [rkey, file] of remoteFilesByRkey.entries()) {
             if (localFilesByRkey.has(rkey)) {
                 writes.push({
                     $type: 'com.atproto.repo.applyWrites#delete',
@@ -49,7 +49,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         }
     }
 
-    for (const [rkey, file] of Object.entries(localFilesByRkey)) {
+    for (const [rkey, file] of localFilesByRkey.entries()) {
         const remoteFile = remoteFilesByRkey.get(rkey);
 
         if (remoteFile) {
@@ -110,5 +110,5 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         })
     }
 
-    new Notice(`Done synchronizing ${Object.keys(localFilesByRkey).length} files to remote repo @${settings.bskyHandle}.`);
+    new Notice(`Done synchronizing ${localFilesByRkey.size} files to remote repo @${settings.bskyHandle}.`);
 }

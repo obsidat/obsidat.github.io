@@ -18,7 +18,7 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
 
     const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
 
-    const notice = new Notice(`Sharing ${files.length} files!`);
+    new Notice(`Sharing ${files.length} files to @${settings.bskyHandle}...`);
 
     const localFileList = files.map(file => app.vault.getAbstractFileByPath(file));
 
@@ -31,12 +31,13 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
         })
     );
 
-    for (const [rkey, file] of Object.entries(localFilesByRkey)) {
+    for (const [rkey, file] of localFilesByRkey.entries()) {
         if (file.extension === 'md' || file.extension === '.md') {
+            console.log(`processing frontmatter for ${file.path}`);
             app.fileManager.processFrontMatter(file, (frontmatter) => {
                 frontmatter["share-url"] = `${ATMOSPHERE_CLIENT}/page/${settings.bskyHandle}/${rkey}`;
-                console.log(frontmatter);
             });
+            console.log(`processed frontmatter for ${file.path}`);
         }
 
         const fileData = await file.vault.readBinary(file);
@@ -90,5 +91,5 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
         })
     }
 
-    notice.setMessage('Done!');
+    new Notice(`Shared ${files.length} files to @${settings.bskyHandle}`);
 }
