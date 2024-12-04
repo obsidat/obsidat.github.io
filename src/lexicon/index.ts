@@ -136,6 +136,14 @@ export declare namespace IoGithubObsidatGeneric {
         /** The string. */
         value: string;
     }
+    /** Represents a key-value mapping whose key is a string and whose value is an integer. */
+    interface StringIntMapping {
+        [Brand.Type]?: "io.github.obsidat.generic#stringIntMapping";
+        /** The key for this key-value mapping. */
+        key: string;
+        /** The value for this key-value mapping. */
+        value?: number;
+    }
     /** A generic undefined value, boxed for unions. This is a marker type, and only its `$type` property is meaningful. Most unions are expected to use an optional property for representing `undefined`, however this type is also available for completeness. */
     interface Undefined {
         [Brand.Type]?: "io.github.obsidat.generic#undefined";
@@ -156,10 +164,28 @@ export declare namespace IoGithubObsidatPublicFile {
         recordCreatedAt: string;
         /** The name of the vault the file is stored in. */
         vaultName: string;
+        /** Aliases for the file, if any. */
+        aliases?: string[];
+        cover?: string;
+        description?: string;
         /** The Markdown frontmatter, serialized as an array of keyValuePair objects. Will be `undefined` for non-Markdown or non-textual files. */
         frontmatter?: IoGithubObsidatGeneric.KeyValuePair[];
+        image?: string;
+        /** A list of pages this page links to, alongside the link count. */
+        resolvedLinks?: IoGithubObsidatPublicFile.PageAndLinkCount[];
+        /** Tags for the file, if any. */
+        tags?: string[];
         /** A descriptive title for the file, if any. */
         title?: string;
+        /** A list of unresolved links from this page, alongside the link count. */
+        unresolvedLinks?: IoGithubObsidatPublicFile.PageAndLinkCount[];
+    }
+    interface PageAndLinkCount {
+        [Brand.Type]?: "io.github.obsidat.publicFile#pageAndLinkCount";
+        /** The amount of links to the page present. */
+        linkCount: number;
+        /** The page that is being linked to. */
+        page: string;
     }
 }
 

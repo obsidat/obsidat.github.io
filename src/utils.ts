@@ -1,5 +1,5 @@
 import { XRPC, XRPCResponse } from "@atcute/client";
-import type { At, Brand, ComAtprotoRepoListRecords, IoGithubObsidatGeneric, Records } from "@atcute/client/lexicons";
+import type { At, Brand, ComAtprotoRepoListRecords, IoGithubObsidatGeneric, IoGithubObsidatPublicFile, Records } from "@atcute/client/lexicons";
 
 /*!
 The MIT License (MIT)
@@ -142,6 +142,14 @@ export function fromBase32(string: string) {
 
 export function hashFileName(...segments: string[]) {
     return toBase32(blake3(segments.join('')));
+}
+
+export function toPageAndLinkCounts(linksAndCounts: Record<string, number>): IoGithubObsidatPublicFile.PageAndLinkCount[] {
+    return Object.entries(linksAndCounts)
+        .map(([link, count]) => ({
+            page: link,
+            linkCount: count,
+        } satisfies IoGithubObsidatPublicFile.PageAndLinkCount))
 }
 
 export function toKeyValuePairs(data?: undefined): undefined;

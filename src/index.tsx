@@ -1,15 +1,14 @@
 import type { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
-import { encryptData, decryptData, generatePassphrase } from "./encryption.ts";
+import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientNode } from "./oauth-node.ts";
 import type { SessionManager } from "@atproto/api/dist/session-manager";
 
-import { App, arrayBufferToBase64, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, type MarkdownFileInfo } from 'obsidian';
-import { Brand, ComAtprotoRepoApplyWrites, IoGithubAtpObsidianFile } from "@atcute/client/lexicons";
+import { App, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, type MarkdownFileInfo } from 'obsidian';
 import { XRPC } from '@atcute/client';
-import { ATMOSPHERE_CLIENT, Awaitable, chunks, detectMimeType, hashFileName, isCidMatching, paginatedListRecords } from "./utils.ts";
+import { ATMOSPHERE_CLIENT, Awaitable } from "./utils.ts";
 
 import { h } from '@jsx';
-import { doSync, getLocalFileRkey } from "./sync/sync.ts";
+import { doPush, getLocalFileRkey } from "./sync/push.ts";
 
 // Remember to rename these classes and interfaces!
 
@@ -66,7 +65,7 @@ export default class MyPlugin extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Synchronize to AT Protocol', async (evt: MouseEvent) => {
 			const agent = await this.agent;
 			
-			doSync(agent, this.app, this.settings);
+			doPush(agent, this.app, this.settings);
 		});
 		
 		this.addCommand({

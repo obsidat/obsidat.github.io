@@ -1,11 +1,10 @@
 import { CrockfordBase32 } from 'crockford-base32';
 import { Encrypter, Decrypter } from './typage/index.ts';
 import { randomBytes } from '@noble/hashes/utils';
-import { encode as encode85, decode as decode85 } from 'base85';
 import { toBuffer } from './utils.ts';
 
-export function generatePassphrase() {
-    return CrockfordBase32.encode(toBuffer(randomBytes(256 / 8))); // 256 bits of entropy
+export function generatePassphrase(bits = 256) {
+    return CrockfordBase32.encode(toBuffer(randomBytes(Math.max(1, (bits / 8) | 0))));
 }
 
 export async function encryptData(data: Uint8Array, passphrase?: string) {

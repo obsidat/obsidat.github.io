@@ -1,6 +1,6 @@
 import { App, Notice, TFile, arrayBufferToBase64 } from "obsidian";
 import { encryptData } from "../encryption";
-import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT } from "../utils";
+import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
@@ -56,12 +56,21 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
             data: new Blob([fileData], { type: detectMimeType(file.path) })
         });
 
+        const fileCache = app.metadataCache.getFileCache(file);
+
         const value = {
             $type: 'io.github.obsidat.publicFile',
             body: uploadBlobOutput.data.blob,
             filePath: file.path,
             vaultName: file.vault.getName(),
-            frontmatter: toKeyValuePairs(app.metadataCache.getFileCache(file)?.frontmatter),
+            title: fileCache?.frontmatter?.title ?? fileCache?.frontmatter?.name,
+            tags: fileCache?.tags?.map(e => e.tag) ?? fileCache?.frontmatter?.tags ?? fileCache?.frontmatter?.tag,
+            aliases: fileCache?.frontmatter?.aliases ?? fileCache?.frontmatter?.alias,
+            image: fileCache?.frontmatter?.cover ?? fileCache?.frontmatter?.image,
+            description: fileCache?.frontmatter?.description ?? fileCache?.frontmatter?.desc,
+            resolvedLinks: toPageAndLinkCounts(app.metadataCache.resolvedLinks[file.path]),
+            unresolvedLinks: toPageAndLinkCounts(app.metadataCache.unresolvedLinks[file.path]),
+            frontmatter: toKeyValuePairs(fileCache?.frontmatter),
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
         } satisfies IoGithubObsidatPublicFile.Record;

@@ -12,7 +12,7 @@ export function getLocalFileRkey(file: TFile, settings: MyPluginSettings) {
     return `${file.path}:${file.vault.getName()}:${settings.passphrase}:${STATIC_SALT}`;
 }
 
-export async function doSync(agent: XRPC, app: App, settings: MyPluginSettings) {
+export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
 
     const collection = 'io.github.obsidat.file';
