@@ -88,9 +88,9 @@ export function truncate(text: string, len = 250) {
 }
 
 //create an empty mime-type:
-import { DuplicationProcessWay, type IMimeTypes, MimeType } from 'mime-type';
+import { type DuplicationProcessWay, type IMimeTypes, MimeType } from 'mime-type';
 import db from 'mime-db';
-const mime = new MimeType(db as IMimeTypes, DuplicationProcessWay.dupDefault);
+const mime = new MimeType(db as IMimeTypes, 0 as DuplicationProcessWay);
 
 export function detectMimeType(pathOrExtension: string) {
     let result = mime.lookup(pathOrExtension);

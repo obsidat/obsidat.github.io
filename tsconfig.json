@@ -31,5 +31,5 @@
     "jsxFactory": "h"
   },
   "include": [ "./src/**/*.ts", "./src/**/*.tsx" ],
-  "exclude": ["node_modules", "spa"],
+  "exclude": ["node_modules", "spa", "/main.js"],
 }

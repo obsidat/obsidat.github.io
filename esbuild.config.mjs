@@ -30,13 +30,13 @@ buildContext.add('plugin', {
 			compilerOptions: { css: 'injected' },
 			preprocess: sveltePreprocess(),
 		}),
-		nodeModulesPolyfillPlugin({
+		/* nodeModulesPolyfillPlugin({
 			globals: {
 				process: true,
 				Buffer: true,
 			},
 			modules: ['buffer'],
-		}),
+		}), */
 	],
 	entryPoints: ["src/index.tsx"],
 	bundle: true,
@@ -60,7 +60,7 @@ buildContext.add('plugin', {
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "out/index.js",
+	outfile: "main.js",
 	minify: prod,
 
 	platform: 'node',
