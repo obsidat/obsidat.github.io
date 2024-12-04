@@ -21,5 +21,6 @@
       "@parent/*": ["../src/*"],
     },
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "../src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "../src/**/*.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
