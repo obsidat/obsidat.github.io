@@ -1,0 +1,35 @@
+{
+  "lexicon": 1,
+  "id": "io.github.obsidat.vault",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "any",
+      "description": "An Obsidian vault.",
+      "record": {
+        "type": "object",
+        "required": [
+          "name",
+          "vaultCreatedAt",
+          "recordCreatedAt"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The vault's name."
+          },
+          "vaultCreatedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "The vault's creation date."
+          },
+          "recordCreatedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "This record's creation date."
+          }
+        }
+      }
+    }
+  }
+}

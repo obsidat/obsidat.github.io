@@ -1,0 +1,87 @@
+{
+  "lexicon": 1,
+  "id": "io.github.obsidat.file",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "any",
+      "description": "An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase stored in the settings of the atproto-obsidian-sync Obsidian plugin. Record Key is blake3 hash of `filePath || ':' || vaultName || ':' || passphrase || ':' || salt` The salt is currently hardcoded in the plugin but this may change in the future.",
+      "record": {
+        "type": "object",
+        "required": [
+          "body",
+          "path",
+          "recordCreatedAt",
+          "fileLastCreatedOrModified"
+        ],
+        "properties": {
+          "body": {
+            "type": "ref",
+            "ref": "io.github.obsidat.file#encryptedData",
+            "description": "The encrypted file contents."
+          },
+          "path": {
+            "type": "ref",
+            "ref": "io.github.obsidat.file#inlineEncryptedData",
+            "description": "The encrypted file path and vault name in the form `vaultName || ':' || filepath`"
+          },
+          "recordCreatedAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "This record's creation date."
+          },
+          "fileLastCreatedOrModified": {
+            "type": "string",
+            "description": "The file's creation or modification date."
+          }
+        }
+      }
+    },
+    "encryptedData": {
+      "type": "object",
+      "required": [
+        "header",
+        "nonce",
+        "payload"
+      ],
+      "description": "A reference to a blob containing data encrypted using ACE Encryption",
+      "properties": {
+        "header": {
+          "type": "string",
+          "description": "The ACE textual header."
+        },
+        "nonce": {
+          "type": "bytes",
+          "description": "A cryptographically random, non-repeating initialization vector (IV)."
+        },
+        "payload": {
+          "type": "blob",
+          "description": "The blob containing the ciphertext."
+        }
+      }
+    },
+    "inlineEncryptedData": {
+      "type": "object",
+      "required": [
+        "header",
+        "nonce",
+        "payload"
+      ],
+      "description": "A data field encrypted using ACE Encryption",
+      "properties": {
+        "header": {
+          "type": "string",
+          "description": "The ACE textual header."
+        },
+        "nonce": {
+          "type": "bytes",
+          "description": "A cryptographically random, non-repeating initialization vector (IV)."
+        },
+        "payload": {
+          "type": "bytes",
+          "description": "The ciphertext."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "lexicon": 1,
+  "id": "io.github.obsidat.generic",
+  "defs": {
+    "generic": {
+      "description": "Represents a union of generic JSON-compatible types.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "union",
+          "closed": true,
+          "refs": [
+            "io.github.obsidat.generic#string",
+            "io.github.obsidat.generic#number",
+            "io.github.obsidat.generic#object",
+            "io.github.obsidat.generic#null"
+          ],
+          "description": "The value. A value of `undefined` is represented by a property with a value missing or `undefined`."
+        }
+      }
+    },
+    "keyValuePair": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "description": "Represents a key-value mapping whose value is a union of generic JSON-compatible types.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The key for this key-value mapping."
+        },
+        "value": {
+          "type": "union",
+          "closed": true,
+          "refs": [
+            "io.github.obsidat.generic#string",
+            "io.github.obsidat.generic#number",
+            "io.github.obsidat.generic#object",
+            "io.github.obsidat.generic#null"
+          ],
+          "description": "The value for this key-value mapping. A value of `undefined` is represented by a property with a value missing or `undefined`."
+        }
+      }
+    },
+    "stringIntMapping": {
+      "type": "object",
+      "required": [
+        "key"
+      ],
+      "description": "Represents a key-value mapping whose key is a string and whose value is an integer.",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The key for this key-value mapping."
+        },
+        "value": {
+          "type": "integer",
+          "description": "The value for this key-value mapping."
+        }
+      }
+    },
+    "string": {
+      "type": "object",
+      "description": "A generic string value, boxed for unions.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The string."
+        }
+      }
+    },
+    "number": {
+      "type": "object",
+      "description": "A generic JSON number value, serialized as a string.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The number, encoded in JSON number format."
+        }
+      }
+    },
+    "object": {
+      "type": "object",
+      "description": "A generic JSON object or array value, serialized as a string.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "The object or array, encoded in JSON format."
+        }
+      }
+    },
+    "undefined": {
+      "type": "object",
+      "description": "A generic undefined value, boxed for unions. This is a marker type, and only its `$type` property is meaningful. Most unions are expected to use an optional property for representing `undefined`, however this type is also available for completeness.",
+      "properties": {}
+    },
+    "null": {
+      "type": "object",
+      "description": "A generic null value, boxed for unions. This is a marker type, and only its `$type` property is meaningful.",
+      "properties": {}
+    }
+  }
+}
