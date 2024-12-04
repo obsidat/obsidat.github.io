@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: latest
           cache: 'pnpm'
-          cache-dependency-path: npanda/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: |
