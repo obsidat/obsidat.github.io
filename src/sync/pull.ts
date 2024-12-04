@@ -18,8 +18,6 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     const localFileList = app.vault.getAllLoadedFiles();
     localFileList.splice(0, 1); // why?
 
-    const notice = new Notice(`Synchronizing ${localFileList.length} files!`);
-
     const localFilesByRkey = Object.fromEntries(
         localFileList
             .filter(e => e instanceof TFile)
@@ -32,6 +30,8 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
                 }
             ])
     );
+
+    new Notice(`Pulling changes from remote repo @${settings.bskyHandle}...`);
 
     if (settings.deleteMissingLocalFiles) {
         for (const [rkey, file] of Object.entries(localFilesByRkey)) {
@@ -87,5 +87,5 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         }
     }
 
-    notice.setMessage('Done!');
+    new Notice(`Pulled down ${Object.keys(remoteFilesByRkey).length} files from @${settings.bskyHandle}.`);
 }

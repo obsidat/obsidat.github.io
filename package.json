@@ -2,12 +2,12 @@
   "name": "atproto-obsidian-sync",
   "version": "1.0.0",
   "description": "",
-  "main": "out/index.js",
+  "main": "main.js",
   "scripts": {
     "dev": "vite build --watch --mode development",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "build": "tsc -noEmit -skipLibCheck && vite build --mode production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
-    "lex": "tsx src/tools/yaml2json -i \"./lexicons-src/*.yml\" -o \"./lexicons\"; lex-cli generate -o ./src/lexicon/lexicons.ts ./lexicons/*; lex-cli generate-main -o ./src/lexicon/index.ts ./lexicons/*"
+    "lex": "tsx utils/yaml2json -i \"./lexicons-src/*.yml\" -o \"./lexicons\"; lex-cli generate -o ./src/lexicon/lexicons.ts ./lexicons/*; lex-cli generate-main -o ./src/lexicon/index.ts ./lexicons/*"
   },
   "keywords": [],
   "author": "",
@@ -57,6 +57,8 @@
     "@noble/hashes": "^1.6.1",
     "@scure/base": "^1.2.1",
     "age-encryption": "^0.1.5",
+    "base32-decode": "^1.0.0",
+    "base32-encode": "^2.0.0",
     "base85": "^3.1.0",
     "buffer": "^6.0.3",
     "builtin-modules": "^4.0.0",

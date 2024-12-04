@@ -1,10 +1,10 @@
 import { CrockfordBase32 } from 'crockford-base32';
 import { Encrypter, Decrypter } from './typage/index.ts';
 import { randomBytes } from '@noble/hashes/utils';
-import { toBuffer } from './utils.ts';
+import { toBase32 } from './utils.ts';
 
 export function generatePassphrase(bits = 256) {
-    return CrockfordBase32.encode(toBuffer(randomBytes(Math.max(1, (bits / 8) | 0))));
+    return toBase32(randomBytes(Math.max(1, (bits / 8) | 0)));
 }
 
 export async function encryptData(data: Uint8Array, passphrase?: string) {
@@ -14,7 +14,7 @@ export async function encryptData(data: Uint8Array, passphrase?: string) {
     e.setPassphrase(passphrase);
     const { header, nonce, payload } = await e.encryptAsParts(data);
     
-    return { passphrase, header: new TextDecoder().decode(header), nonce: toBuffer(nonce), payload };
+    return { passphrase, header: new TextDecoder().decode(header), nonce, payload };
 }
 
 export async function decryptData({ header: headerText, nonce, payload }: {

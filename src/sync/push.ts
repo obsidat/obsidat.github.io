@@ -19,9 +19,10 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
     const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
 
     const localFileList = app.vault.getAllLoadedFiles();
-    localFileList.splice(0, 1); // why?
 
-    const notice = new Notice(`Synchronizing ${localFileList.length} files!`);
+    console.log(localFileList);
+
+    localFileList.splice(0, 1); // why?
 
     const localFilesByRkey = Object.fromEntries(
         localFileList
@@ -35,6 +36,10 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
                 }
             ])
     );
+
+    console.log(localFilesByRkey);
+
+    new Notice(`Synchronizing ${Object.keys(localFilesByRkey).length} files to remote repo @${settings.bskyHandle}...`);
 
     if (settings.deleteMissingRemoteFiles) {
         for (const [rkey, file] of Object.entries(remoteFilesByRkey)) {
@@ -111,5 +116,5 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         })
     }
 
-    notice.setMessage('Done!');
+    new Notice(`Done synchronizing ${Object.keys(localFilesByRkey).length} files to remote repo @${settings.bskyHandle}.`);
 }

@@ -104,6 +104,8 @@ import { parse as parseCid, create as createCid, format as formatCid } from '@at
 import { CrockfordBase32 } from "crockford-base32";
 import { blake3 } from "@noble/hashes/blake3";
 import { DidDocument } from "@atcute/client/utils/did";
+import base32Encode from 'base32-encode';
+import base32Decode from 'base32-decode';
 
 export function isCidMatching(data: ArrayBufferLike, blob: At.Blob) {
     const cid = parseCid(blob.ref.$link);
@@ -134,11 +136,11 @@ export function isEqualBytes(bytes1: Uint8Array, bytes2: Uint8Array): boolean {
 }
 
 export function toBase32(buffer: ArrayBufferLike) {
-    return CrockfordBase32.encode(toBuffer(buffer));
+    return base32Encode(buffer, 'Crockford');
 }
 
 export function fromBase32(string: string) {
-    return new Uint8Array(CrockfordBase32.decode(string));
+    return base32Decode(string, 'Crockford');
 }
 
 export function hashFileName(...segments: string[]) {
