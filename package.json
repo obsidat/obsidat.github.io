@@ -37,6 +37,7 @@
     "@atcute/cid": "^1.0.2",
     "@atcute/client": "^2.0.6",
     "@atcute/lex-cli": "^1.0.3",
+    "@atcute/oauth-browser-client": "^1.0.7",
     "@atproto/api": "^0.13.18",
     "@atproto/common": "^0.4.4",
     "@atproto/identity": "^0.4.3",
