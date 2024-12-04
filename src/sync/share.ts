@@ -4,6 +4,7 @@ import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chun
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
+import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings, files: string[]) {
     const currentDate = new Date();
@@ -13,7 +14,7 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
-    const remoteFilesByRkey = Object.fromEntries(remoteFiles.map(file => [file.rkey, file.value]));
+    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
 
     const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
 
@@ -21,16 +22,13 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
 
     const localFileList = files.map(file => app.vault.getAbstractFileByPath(file));
 
-    const localFilesByRkey = Object.fromEntries(
-        localFileList
-            .filter(e => e instanceof TFile)
-            .map(e => [
-                hashFileName(`${e.path}:${e.vault.getName()}`),
-                {
-                    ...e,
-                    fileLastCreatedOrModified: Math.max(e.stat.ctime, e.stat.mtime),
-                }
-            ])
+    const localFilesByRkey = CaseInsensitiveMap.toMap(
+        localFileList.filter(e => e instanceof TFile),
+        file => hashFileName(`${file.path}:${file.vault.getName()}`),
+        file => ({
+            ...file,
+            fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
+        })
     );
 
     for (const [rkey, file] of Object.entries(localFilesByRkey)) {
@@ -43,9 +41,9 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
 
         const fileData = await file.vault.readBinary(file);
 
-        if (rkey in remoteFilesByRkey) {
-            const remoteFile = remoteFilesByRkey[rkey];
+        const remoteFile = remoteFilesByRkey.get(rkey);
 
+        if (remoteFile) {
             if (fileData.byteLength === remoteFile.body.size && isCidMatching(fileData, remoteFile.body)) {
                 // files are identical! dont upload!
                 continue;
@@ -76,7 +74,7 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
         } satisfies IoGithubObsidatPublicFile.Record;
 
         writes.push({
-            $type: rkey in remoteFilesByRkey ? 'com.atproto.repo.applyWrites#update' : 'com.atproto.repo.applyWrites#create',
+            $type: remoteFile ? 'com.atproto.repo.applyWrites#update' : 'com.atproto.repo.applyWrites#create',
             collection,
             rkey,
             value

@@ -6,6 +6,7 @@ import { At, Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcu
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
 import { decryptFileContents, decryptFileName, downloadFileContents } from "../crypto-utils";
+import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
     const collection = 'io.github.obsidat.file';
@@ -13,38 +14,35 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
-    const remoteFilesByRkey = Object.fromEntries(remoteFiles.map(file => [file.rkey, file.value]));
+    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
 
     const localFileList = app.vault.getAllLoadedFiles();
     localFileList.splice(0, 1); // why?
 
-    const localFilesByRkey = Object.fromEntries(
-        localFileList
-            .filter(e => e instanceof TFile)
-            // TODO is it safe to include passphrase here?
-            .map(file => [
-                hashFileName(getLocalFileRkey(file, settings)),
-                {
-                    ...file,
-                    fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
-                }
-            ])
+    const localFilesByRkey = CaseInsensitiveMap.toMap(
+        localFileList.filter(e => e instanceof TFile),
+
+        file => hashFileName(getLocalFileRkey(file, settings)),
+        file => ({
+            ...file,
+            fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
+        })
     );
 
     new Notice(`Pulling changes from remote repo @${settings.bskyHandle}...`);
 
     if (settings.deleteMissingLocalFiles) {
-        for (const [rkey, file] of Object.entries(localFilesByRkey)) {
-            if (!(rkey in remoteFilesByRkey)) {
+        for (const [rkey, file] of localFilesByRkey.entries()) {
+            if (!remoteFilesByRkey.has(rkey)) {
                 await app.fileManager.trashFile(file);
             }
         }
     }
 
     for (const [rkey, remoteFile] of Object.entries(remoteFilesByRkey)) {
-        if (rkey in localFilesByRkey) {
-            const localFile = localFilesByRkey[rkey];
+        const localFile = localFilesByRkey.get(rkey)!;
 
+        if (localFile) {
             if (settings.dontOverwriteNewFiles &&
                 localFile.fileLastCreatedOrModified >= new Date(remoteFile.fileLastCreatedOrModified).getTime() ) {
                 // local file is newer! dont overwrite!
@@ -73,8 +71,8 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
             settings.passphrase
         );
 
-        if (rkey in localFilesByRkey) {
-            await app.vault.modifyBinary(localFilesByRkey[rkey], fileData, {
+        if (localFile) {
+            await app.vault.modifyBinary(localFile, fileData, {
                 mtime: new Date(remoteFile.fileLastCreatedOrModified).getTime()
             });
         } else {

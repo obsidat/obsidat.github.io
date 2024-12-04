@@ -8,7 +8,7 @@ import { h } from '@jsx';
 
 import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
-import { ATMOSPHERE_CLIENT, Awaitable, hashFileName } from "./utils.ts";
+import { ATMOSPHERE_CLIENT, Awaitable, hashFileName } from "./utils/index.ts";
 import { doPush } from "./sync/push.ts";
 import { getLocalFileRkey } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";

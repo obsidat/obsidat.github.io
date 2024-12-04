@@ -5,7 +5,7 @@ import { Agent } from '@atproto/api';
 import type MyPlugin from './index.ts';
 import { randomBytes } from '@noble/hashes/utils';
 import { encode as encode85 } from 'base85';
-import { toBuffer } from './utils.ts';
+import { toBuffer } from './utils/index.ts';
 import type { ObsidianAtpOauthClient } from 'oauth.ts';
 
 export class StateStore implements NodeSavedStateStore {

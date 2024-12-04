@@ -1,7 +1,7 @@
 import { CrockfordBase32 } from 'crockford-base32';
 import { Encrypter, Decrypter } from './typage/index.ts';
 import { randomBytes } from '@noble/hashes/utils';
-import { toBase32 } from './utils.ts';
+import { toBase32 } from './utils/index.ts';
 
 export function generatePassphrase(bits = 256) {
     return toBase32(randomBytes(Math.max(1, (bits / 8) | 0)));

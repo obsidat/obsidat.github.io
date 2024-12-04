@@ -5,6 +5,7 @@ import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chun
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
 import { encryptFileContents, encryptFileName } from "../crypto-utils";
+import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
@@ -14,27 +15,22 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
-    const remoteFilesByRkey = Object.fromEntries(remoteFiles.map(file => [file.rkey, file.value]));
+    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
 
     const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
 
     const localFileList = app.vault.getAllLoadedFiles();
 
     console.log(localFileList);
-
     localFileList.splice(0, 1); // why?
 
-    const localFilesByRkey = Object.fromEntries(
-        localFileList
-            .filter(e => e instanceof TFile)
-            // TODO is it safe to include passphrase here?
-            .map(file => [
-                hashFileName(getLocalFileRkey(file, settings)),
-                {
-                    ...file,
-                    fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
-                }
-            ])
+    const localFilesByRkey = CaseInsensitiveMap.toMap(
+        localFileList.filter(e => e instanceof TFile),
+        file => hashFileName(getLocalFileRkey(file, settings)),
+        file => ({
+            ...file,
+            fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
+        })
     );
 
     console.log(localFilesByRkey);
@@ -43,7 +39,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
     if (settings.deleteMissingRemoteFiles) {
         for (const [rkey, file] of Object.entries(remoteFilesByRkey)) {
-            if (!(rkey in localFilesByRkey)) {
+            if (localFilesByRkey.has(rkey)) {
                 writes.push({
                     $type: 'com.atproto.repo.applyWrites#delete',
                     collection,
@@ -54,9 +50,9 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
     }
 
     for (const [rkey, file] of Object.entries(localFilesByRkey)) {
-        if (rkey in remoteFilesByRkey) {
-            const remoteFile = remoteFilesByRkey[rkey];
+        const remoteFile = remoteFilesByRkey.get(rkey);
 
+        if (remoteFile) {
             if (settings.dontOverwriteNewFiles &&
                 new Date(remoteFile.fileLastCreatedOrModified).getTime() >= file.fileLastCreatedOrModified) {
                 // remote file is newer! dont overwrite!
@@ -74,9 +70,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
             encryptFileName(file, settings.passphrase),
         ]);
 
-        if (rkey in remoteFilesByRkey) {
-            const remoteFile = remoteFilesByRkey[rkey];
-
+        if (remoteFile) {
             if (encryptedFileData.payload.byteLength === remoteFile.body.payload.size &&
                 isCidMatching(encryptedFileData.payload, remoteFile.body.payload)) {
                 // files are identical! dont upload!
@@ -100,7 +94,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         } satisfies IoGithubObsidatFile.Record;
 
         writes.push({
-            $type: rkey in remoteFilesByRkey ? 'com.atproto.repo.applyWrites#update' : 'com.atproto.repo.applyWrites#create',
+            $type: remoteFile ? 'com.atproto.repo.applyWrites#update' : 'com.atproto.repo.applyWrites#create',
             collection,
             rkey,
             value
