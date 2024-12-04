@@ -17,11 +17,11 @@ export async function encryptData(data: Uint8Array, passphrase?: string) {
     return { passphrase, header: new TextDecoder().decode(header), nonce: toBuffer(nonce), payload };
 }
 
-export async function decryptData(passphrase: string, { header: headerText, nonce, payload }: {
+export async function decryptData({ header: headerText, nonce, payload }: {
     header: string;
     nonce: Uint8Array;
     payload: Uint8Array;
-}) {
+}, passphrase: string) {
     const e = new Decrypter();
     e.addPassphrase(passphrase);
     

@@ -166,11 +166,12 @@ export declare namespace IoGithubObsidatPublicFile {
         vaultName: string;
         /** Aliases for the file, if any. */
         aliases?: string[];
+        /** Link to a local or remote cover image for the file, if any. */
         cover?: string;
+        /** File description, if any. */
         description?: string;
         /** The Markdown frontmatter, serialized as an array of keyValuePair objects. Will be `undefined` for non-Markdown or non-textual files. */
         frontmatter?: IoGithubObsidatGeneric.KeyValuePair[];
-        image?: string;
         /** A list of pages this page links to, alongside the link count. */
         resolvedLinks?: IoGithubObsidatPublicFile.PageAndLinkCount[];
         /** Tags for the file, if any. */

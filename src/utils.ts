@@ -103,6 +103,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { parse as parseCid, create as createCid, format as formatCid } from '@atcute/cid';
 import { CrockfordBase32 } from "crockford-base32";
 import { blake3 } from "@noble/hashes/blake3";
+import { DidDocument } from "@atcute/client/utils/did";
 
 export function isCidMatching(data: ArrayBufferLike, blob: At.Blob) {
     const cid = parseCid(blob.ref.$link);
@@ -153,21 +154,21 @@ export function toPageAndLinkCounts(linksAndCounts: Record<string, number>): IoG
 }
 
 export function toKeyValuePairs(data?: undefined): undefined;
-export function toKeyValuePairs(data: Record<string, any>): IoGithubObsidatGeneric.KeyValuePair[];
-export function toKeyValuePairs(data?: Record<string, any>): IoGithubObsidatGeneric.KeyValuePair[] | undefined;
-export function toKeyValuePairs(data?: Record<string, any>): IoGithubObsidatGeneric.KeyValuePair[] | undefined {
+export function toKeyValuePairs(data: Record<string, unknown>): IoGithubObsidatGeneric.KeyValuePair[];
+export function toKeyValuePairs(data?: Record<string, unknown>): IoGithubObsidatGeneric.KeyValuePair[] | undefined;
+export function toKeyValuePairs(data?: Record<string, unknown>): IoGithubObsidatGeneric.KeyValuePair[] | undefined {
     if (!data) return undefined;
     return Object.entries(data).map(toKeyValuePair);
 }
 
-export function toKeyValuePair(data: [key: string, value: any]): IoGithubObsidatGeneric.KeyValuePair {
+export function toKeyValuePair(data: [key: string, value: unknown]): IoGithubObsidatGeneric.KeyValuePair {
     return {
         key: data[0],
         value: toGenericValue(data[1]),
     } satisfies IoGithubObsidatGeneric.KeyValuePair;
 }
 
-export function toGenericValue(value: any): Brand.Union<
+export function toGenericValue(value: unknown): Brand.Union<
     | IoGithubObsidatGeneric.Null
     | IoGithubObsidatGeneric.Number
     | IoGithubObsidatGeneric.Object
@@ -191,3 +192,19 @@ export function toGenericValue(value: any): Brand.Union<
 }
 
 export const ATMOSPHERE_CLIENT = `https://obsidat.github.io/#`;
+
+export function splitFirst(string: string, separator: string): [left: string, right: string] {
+    const idx = string.indexOf(separator);
+    if (idx === -1) return [string, ''];
+    return [string.slice(0, idx), string.slice(idx + 1)];
+}
+
+export function getDid(didDoc: DidDocument): At.DID {
+    return didDoc.id as At.DID;
+}
+
+export function getHandle(didDoc: DidDocument) {
+    return didDoc.alsoKnownAs
+        ?.find(handle => handle.startsWith('at://'))
+        ?.slice('at://'.length);
+}

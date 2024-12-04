@@ -1,19 +1,23 @@
+import { App, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, type MarkdownFileInfo } from 'obsidian';
+
 import type { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
+import type { SessionManager } from "@atproto/api/dist/session-manager";
+import { XRPC } from '@atcute/client';
+import { At } from "@atcute/client/lexicons";
+import { h } from '@jsx';
+
 import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientNode } from "./oauth-node.ts";
-import type { SessionManager } from "@atproto/api/dist/session-manager";
-
-import { App, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, type MarkdownFileInfo } from 'obsidian';
-import { XRPC } from '@atcute/client';
 import { ATMOSPHERE_CLIENT, Awaitable } from "./utils.ts";
-
-import { h } from '@jsx';
-import { doPush, getLocalFileRkey } from "./sync/push.ts";
+import { doPush } from "./sync/push.ts";
+import { getLocalFileRkey } from "./sync/index.ts";
+import { doPull } from "./sync/pull.ts";
 
 // Remember to rename these classes and interfaces!
 
 export interface MyPluginSettings {
 	deleteMissingRemoteFiles: boolean;
+	deleteMissingLocalFiles: boolean;
 	dontOverwriteNewFiles: boolean;
 	passphrase: string;
 	bskyHandle?: string;
@@ -25,6 +29,7 @@ export interface MyPluginSettings {
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	deleteMissingRemoteFiles: true,
+	deleteMissingLocalFiles: false,
 	dontOverwriteNewFiles: false,
 	passphrase: undefined!,
 	auth: {
@@ -58,14 +63,27 @@ export default class MyPlugin extends Plugin {
 		})();
 	}
 
+	private _did?: At.DID;
+	private get did(): Awaitable<At.DID> {
+		if (this._did) return this._did;
+		
+		return (async () => {
+			return this._did = ((await this.session).did
+				?? (this.settings.bskyHandle?.startsWith('did:') ? this.settings.bskyHandle : undefined!)
+			) as At.DID;
+		})();
+	}
+
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Synchronize to AT Protocol', async (evt: MouseEvent) => {
-			const agent = await this.agent;
-			
-			doPush(agent, this.app, this.settings);
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Push changes to AT Protocol', async (evt: MouseEvent) => {
+			doPush(await this.agent, this.app, this.settings);
+		});
+
+		this.addRibbonIcon('dice', 'Pull changes from AT Protocol', async (evt: MouseEvent) => {
+			doPull(await this.agent, this.app, this.settings, await this.did);
 		});
 		
 		this.addCommand({
@@ -317,13 +335,24 @@ class SampleSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// TODO: add 'trashed' records to atproto repo so this is less flaky
 		new Setting(containerEl)
-			.setName('Sync: Delete files not at destination')
+			.setName('Push: Delete files not at source')
 			.setDesc('Whether or not to delete files in the ATProto repo if they are deleted locally')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.deleteMissingRemoteFiles)
 				.onChange(async (value) => {
 					this.plugin.settings.deleteMissingRemoteFiles = value;
+					await this.plugin.saveSettings();
+				}));
+				
+		new Setting(containerEl)
+			.setName('Pull: Delete files not at destination')
+			.setDesc('Whether or not to trash files locally if they are not found in the ATProto repo')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.deleteMissingLocalFiles)
+				.onChange(async (value) => {
+					this.plugin.settings.deleteMissingLocalFiles = value;
 					await this.plugin.saveSettings();
 				}));
 
@@ -338,5 +367,6 @@ class SampleSettingTab extends PluginSettingTab {
 					this.plugin.settings.dontOverwriteNewFiles = value;
 					await this.plugin.saveSettings();
 				}));
+
 	}
 }
