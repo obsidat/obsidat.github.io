@@ -136,7 +136,7 @@ export function isEqualBytes(bytes1: Uint8Array, bytes2: Uint8Array): boolean {
 }
 
 export function toBase32(buffer: ArrayBufferLike) {
-    return base32Encode(buffer, 'Crockford');
+    return base32Encode(buffer, 'Crockford').toLowerCase();
 }
 
 export function fromBase32(string: string) {
