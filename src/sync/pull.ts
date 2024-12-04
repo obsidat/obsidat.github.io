@@ -62,7 +62,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
 
         // TODO encode passphrase in file properties (how would we do this for binary files?)
         const encryptedFileData = await downloadFileContents(
-            settings.bskyHandle!,
+            did,
             agent,
             remoteFile
         );

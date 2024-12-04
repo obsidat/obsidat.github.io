@@ -2,12 +2,12 @@ import { App, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSetti
 
 import type { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 import type { SessionManager } from "@atproto/api/dist/session-manager";
-import { XRPC } from '@atcute/client';
+import { FetchHandlerObject, XRPC } from '@atcute/client';
 import { At } from "@atcute/client/lexicons";
 import { h } from '@jsx';
 
 import { generatePassphrase } from "./encryption.ts";
-import { ObsidianAtpOauthClientNode } from "./oauth-node.ts";
+import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
 import { ATMOSPHERE_CLIENT, Awaitable } from "./utils.ts";
 import { doPush } from "./sync/push.ts";
 import { getLocalFileRkey } from "./sync/index.ts";
@@ -40,16 +40,16 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings = DEFAULT_SETTINGS;
-	private _session?: SessionManager;
+	private _session?: FetchHandlerObject & { sub: At.DID; };
 	private _agent?: XRPC;
 
-	private get session(): Awaitable<SessionManager> {
+	private get session(): Awaitable<FetchHandlerObject & { sub: At.DID; }> {
 		if (!this.settings.bskyHandle) throw new Error('No ATP handle defined in settings!');
 
 		if (this._session) return this._session;
 
 		return (async () => {
-			return this._session = await new ObsidianAtpOauthClientNode(this).authenticate(this.settings.bskyHandle!);
+			return this._session = await new ObsidianAtpOauthClientXPlat(this.app).authenticate(this.settings.bskyHandle!);
 		})();
 	}
 
@@ -57,7 +57,7 @@ export default class MyPlugin extends Plugin {
 		if (this._agent) return this._agent;
 
 		return (async () => {
-			const rpc = new XRPC({ handler: (await this.session).fetchHandler });
+			const rpc = new XRPC({ handler: await this.session });
 
 			return this._agent = rpc;
 		})();
@@ -68,9 +68,13 @@ export default class MyPlugin extends Plugin {
 		if (this._did) return this._did;
 		
 		return (async () => {
-			return this._did = ((await this.session).did
+			const result = this._did = ((await this.session).sub
 				?? (this.settings.bskyHandle?.startsWith('did:') ? this.settings.bskyHandle : undefined!)
-			) as At.DID;
+			) as At.DID | undefined;
+
+			if (!result) throw new Error('No DID!');
+
+			return result;
 		})();
 	}
 

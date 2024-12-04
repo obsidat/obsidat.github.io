@@ -1,10 +1,10 @@
-import { App, Notice, TFile, arrayBufferToBase64 } from "obsidian";
-import { encryptData } from "../encryption";
-import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks } from "../utils";
+import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
+import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks } from "../utils";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
+import { encryptFileContents, encryptFileName } from "../crypto-utils";
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
@@ -63,16 +63,17 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
         const [encryptedFileData, encryptedFilePath] = await Promise.all([
             // TODO encode passphrase in file properties (how would we do this for binary files?)
-            encryptData(new Uint8Array(fileData), settings.passphrase),
+            encryptFileContents(fileData, settings.passphrase),
 
             // TODO potentially check file paths for collisions
-            encryptData(new TextEncoder().encode(`${file.vault.getName()}:${file.path}`), settings.passphrase),
+            encryptFileName(file, settings.passphrase),
         ]);
 
         if (rkey in remoteFilesByRkey) {
             const remoteFile = remoteFilesByRkey[rkey];
 
-            if (encryptedFileData.payload.byteLength === remoteFile.body.payload.size && isCidMatching(encryptedFileData.payload, remoteFile.body.payload)) {
+            if (encryptedFileData.payload.byteLength === remoteFile.body.payload.size &&
+                isCidMatching(encryptedFileData.payload, remoteFile.body.payload)) {
                 // files are identical! dont upload!
                 continue;
             }
@@ -85,21 +86,10 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         const value = {
             $type: 'io.github.obsidat.file',
             body: {
-                header: encryptedFileData.header,
-                nonce: {
-                    $bytes: arrayBufferToBase64(encryptedFileData.nonce),
-                },
+                ...encryptedFileData.recordBody,
                 payload: uploadBlobOutput.data.blob,
             },
-            path: {
-                header: encryptedFilePath.header,
-                nonce: {
-                    $bytes: arrayBufferToBase64(encryptedFilePath.nonce),
-                },
-                payload: {
-                    $bytes: arrayBufferToBase64(encryptedFilePath.payload),
-                },
-            },
+            path: encryptedFilePath,
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
         } satisfies IoGithubObsidatFile.Record;

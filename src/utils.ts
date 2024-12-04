@@ -208,3 +208,13 @@ export function getHandle(didDoc: DidDocument) {
         ?.find(handle => handle.startsWith('at://'))
         ?.slice('at://'.length);
 }
+
+import { fromString, toString } from 'uint8arrays';
+
+export function arrayBufferToBase64(arrayBuffer: ArrayBufferLike) {
+    return toString(new Uint8Array(arrayBuffer), 'base64');
+}
+
+export function base64ToArrayBuffer(string: string) {
+    return fromString(string, 'base64');
+}
