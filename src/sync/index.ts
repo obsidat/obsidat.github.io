@@ -1,6 +1,6 @@
 import { type TFile } from "obsidian";
 import { toString } from 'uint8arrays/to-string'
-import { hashFileName } from "../utils";
+import { hashToBase32 } from "../utils";
 
 // TODO: maybe wanna make this per-repo? or is that unnecessary?
 const STATIC_SALT = toString(
@@ -10,7 +10,7 @@ const STATIC_SALT = toString(
 
 export function getLocalFileRkey(file: TFile | { path: string, vaultName: string }, passphrase: string) {
     // TODO is it safe to include passphrase here?
-    return hashFileName(`${file.path.toLowerCase()}:${('vaultName' in file ? file.vaultName : file.vault.getName()).toLowerCase()}:${passphrase}:${STATIC_SALT}`);
+    return hashToBase32(`${file.path.toLowerCase()}:${('vaultName' in file ? file.vaultName : file.vault.getName()).toLowerCase()}:${passphrase}:${STATIC_SALT}`);
 }
 
 export function getPublicFileRkey(file: TFile | { path: string, vaultName: string }): string {

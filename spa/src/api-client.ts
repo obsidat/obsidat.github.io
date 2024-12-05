@@ -1,7 +1,7 @@
 import { CredentialManager, XRPC } from '@atcute/client';
 import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from '@atcute/client/lexicons';
 import { getActorInfo } from '@parent/api-utils';
-import { decryptFileName, decryptFileContents, downloadFileContents } from '@parent/crypto-utils';
+import { decryptFileName, decryptFileContents, downloadFileContents } from '@parent/utils/crypto-utils';
 import { detectMimeType } from '@parent/utils';
 
 export class ApiClient {

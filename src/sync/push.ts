@@ -1,10 +1,10 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
-import { paginatedListRecords, isCidMatching, chunks } from "../utils";
+import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
-import { encryptFileContents, encryptFileName } from "../crypto-utils";
+import { encryptFileContents, encryptFileName } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {

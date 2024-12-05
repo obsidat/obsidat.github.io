@@ -142,7 +142,7 @@ export function fromBase32(string: string) {
     return base32Decode(string, 'Crockford');
 }
 
-export function hashFileName(...segments: string[]) {
+export function hashToBase32(...segments: string[]) {
     return toBase32(blake3(segments.join('')));
 }
 

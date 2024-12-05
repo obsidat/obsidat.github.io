@@ -1,10 +1,10 @@
 import { App, Notice, TFile } from "obsidian";
-import { paginatedListRecords } from "../utils";
+import { hashToBase32, paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
-import { decryptFileContents, decryptFileName, downloadFileContents } from "../crypto-utils";
+import { decryptFileContents, decryptFileName, downloadFileContents } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
