@@ -52,7 +52,7 @@ export function makeUrl(
     if (passphrase) {
         if (!referencedFilePassphrases || !((filePath + '.md') in referencedFilePassphrases)) {
             console.log('unresolved link:', filePath);
-            return filePath;
+            return `#/${route}/${handle}/${getPublicFileRkey({ path: filePath, vaultName: currentVault })}`;
         }
 
         // TODO filePath or realPath here? is this folder handling correct?

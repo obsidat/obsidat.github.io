@@ -71,6 +71,9 @@ importers:
       base85:
         specifier: ^3.1.0
         version: 3.1.0
+      browser-util-inspect:
+        specifier: ^0.2.0
+        version: 0.2.0
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -126,6 +129,9 @@ importers:
       '@tsconfig/svelte':
         specifier: ^5.0.4
         version: 5.0.4
+      '@types/browser-util-inspect':
+        specifier: ^0.2.4
+        version: 0.2.4
       '@types/child-process-promise':
         specifier: ^2.2.6
         version: 2.2.6
@@ -1107,6 +1113,9 @@ packages:
   '@types/body-parser@1.19.5':
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
 
+  '@types/browser-util-inspect@0.2.4':
+    resolution: {integrity: sha512-m4JohXh9JmxXT3dn4TAnAVquJqSiQMPahKNTfO++ZpZ75AB3aMOmDOCDnFvAPvkG13TzStqJDQRgao4CQvIIZw==}
+
   '@types/child-process-promise@2.2.6':
     resolution: {integrity: sha512-g0pOHijr6Trug43D2bV0PLSIsSHa/xHEES2HeX5BAlduq1vW0nZcq27Zeud5lgmNB+kPYYVqiMap32EHGTco/w==}
 
@@ -1378,6 +1387,9 @@ packages:
 
   browser-resolve@2.0.0:
     resolution: {integrity: sha512-7sWsQlYL2rGLy2IWm8WL8DCTJvYLc/qlOnsakDac87SOoCd16WLsaAMdCiAqsTNHIe+SXfaqyxyo6THoWqs8WQ==}
+
+  browser-util-inspect@0.2.0:
+    resolution: {integrity: sha512-R7WvAj0p9FtwS2Jbtc1HUd1+YZdeb5EEqjBSbbOK3owJtW1viWyJDeTPy43QZ7bZ8POtb1yMv++h844486jMsQ==}
 
   browserify-aes@1.2.0:
     resolution: {integrity: sha512-+7CHXqGuspUn/Sl5aO7Ea0xWGAtETPXNSAjHo48JfLdPWcMng33Xe4znFvQweqc/uzk5zSOI3H52CYnjCfb5hA==}
@@ -3819,6 +3831,8 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/node': 22.10.1
 
+  '@types/browser-util-inspect@0.2.4': {}
+
   '@types/child-process-promise@2.2.6':
     dependencies:
       '@types/node': 22.10.1
@@ -4123,6 +4137,8 @@ snapshots:
   browser-resolve@2.0.0:
     dependencies:
       resolve: 1.22.8
+
+  browser-util-inspect@0.2.0: {}
 
   browserify-aes@1.2.0:
     dependencies:

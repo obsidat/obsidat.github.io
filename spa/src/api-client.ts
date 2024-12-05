@@ -53,7 +53,7 @@ export class ApiClient {
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
                 recordCreatedAt: new Date(file.recordCreatedAt),
                 referencedFilePassphrases: file.referencedFilePassphrases
-                    ? decodeCbor(await decryptInlineData(file.referencedFilePassphrases, passphrase)) as Record<string, string>
+                    ? decodeCbor(await decryptInlineData(file.referencedFilePassphrases, passphrase)) as Record<string, [rkey: string, passphrase: string]>
                     : undefined
             };
         } else {
