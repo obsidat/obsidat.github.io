@@ -31,7 +31,7 @@ SOFTWARE.
         margin: 0 auto;
         max-width: 75ch;
         padding: 0 0.5rem;
-        font: var(--desktop-font-size) -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto, Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+        font: var(--desktop-font-size) var(--default-font);
     }
     
     /* Reset */
@@ -61,7 +61,7 @@ SOFTWARE.
     }
     
     input {
-        font: var(--desktop-font-size) -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto, Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+        font: var(--desktop-font-size) var(--default-font);
     }
 
     h1,h2,h3,h4,h5,h6,p,blockquote,dl,img,figure {
@@ -168,7 +168,7 @@ SOFTWARE.
     /* Mobile Styling */
     @media screen and (max-width: 75ch) {
         body, input {
-            font: var(--mobile-font-size) -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto, Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+            font: var(--mobile-font-size) var(--default-font);
         }
         table { table-layout: auto; }
     }

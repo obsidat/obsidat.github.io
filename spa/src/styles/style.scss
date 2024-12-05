@@ -12,3 +12,57 @@ html, body {
 * {
     box-sizing: border-box;
 }
+
+// override theme vars
+body {
+    margin: 1rem !important;
+
+    text-rendering: optimizeLegibility !important;
+    font-family: var(--default-font) !important;
+    line-height: 1.5em !important;
+    font-size: 16px !important;
+    background-color: var(--background-primary) !important;
+    color: var(--text-normal) !important;
+}
+
+:root {
+    --default-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
+    --font-monospace: 'Source Code Pro', monospace;
+    --background-primary: #ffffff;
+    --background-modifier-border: #ddd;
+    --text-accent: #705dcf;
+    --text-accent-hover: #7a6ae6;
+    --text-normal: #2e3338;
+    --background-secondary: #f2f3f5;
+    --background-secondary-alt: #e3e5e8;
+    --text-muted: #888888;
+
+    --desktop-font-size: 1.2rem/1.55;
+    --mobile-font-size: 1rem/1.45;
+    
+    // vanilla.css
+    --text-color: var(--text-normal);
+    --link-color: var(--text-accent);
+    --link-color-alt: var(--text-accent-hover);
+    --bg-color: var(--background-primary);
+    
+    --primary-color: var(--text-muted);
+    --secondary-color: var(--background-secondary-alt);
+    --tertiary-color: var(--background-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-primary: #202020;
+        --background-modifier-border: #333;
+        --text-accent: #7f6df2;
+        --text-accent-hover: #8875ff;
+        --text-normal: #dcddde;
+        --background-secondary: #161616;
+        --background-secondary-alt: #000000;
+        --text-muted: #999;
+
+        // vanilla.css
+        --primary-color-light: dimgrey;
+    }
+}

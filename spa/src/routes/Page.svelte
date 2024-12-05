@@ -61,32 +61,10 @@
 
 <div class="container">
     {#await filePromise}
-            <style>
-            body {
-                background-color: var(--bg-color) !important;
-                
-                color: var(--text-color) !important;
-                margin: 1rem !important;
-                max-width: 75ch !important;
-                font: var(--desktop-font-size) -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto, Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol" !important;
-            }
-            </style>
         <p>Loading file from repo @{handle}</p>
     {:then file} 
         {#if 'html' in file && file.html}
-            <style>
-            body {
-                margin: 1rem !important;
-
-                text-rendering: optimizeLegibility !important;
-                font-family: var(--default-font) !important;
-                line-height: 1.5em !important;
-                font-size: 16px !important;
-                background-color: var(--background-primary) !important;
-                color: var(--text-normal) !important;
-            }
-            </style>
-            <div class="notion-root">
+            <div class="obsidian-root">
                 <h1>{path.basename(file.filePath, '.md')}</h1>
                 <div bind:this={htmlElement} />
             </div>
