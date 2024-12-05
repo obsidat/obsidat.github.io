@@ -6,6 +6,7 @@ import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile, IoGithubObsidatP
 import MyPlugin, { MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
+import { getPublicFileRkey } from ".";
 
 export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings: MyPluginSettings, files: string[]) {
     const currentDate = new Date();
@@ -27,7 +28,7 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
-        file => hashFileName(`${file.path}:${file.vault.getName()}`),
+        file => hashFileName(getPublicFileRkey(file)),
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),

@@ -2,18 +2,20 @@
     import { hashFileName } from "@parent/utils";
     import { ApiClient } from "../api-client";
     import path from 'path-browserify';
+    import { makeUrl, markdownRender } from "../markdown-renderer";
 
     export let params: { handle: string; rkey: string; passphrase?: string };
 
     const handle = params.handle;
     const rkey = params.rkey;
     const passphrase = params.passphrase;
+    const route = location.hash.startsWith('#/page/') ? 'page' : 'private-page';
 
     let htmlElement: HTMLElement;
     let title: string | undefined;
     let file: Awaited<ReturnType<ApiClient['getAndDecryptFile']>> | undefined = undefined;
     let textContent: string | undefined;
-    let dom: Document | undefined;
+    let dom: DocumentFragment;
 
     const filePromise = ApiClient.create(handle)
         .then(client => client.getAndDecryptFile(rkey, passphrase))
@@ -28,33 +30,45 @@
     }
 
     $: {        
-        dom = file && 'html' in file && file.html
-            ? new DOMParser().parseFromString(file.html, 'text/html')
-            : undefined;
+        if (file && 'html' in file && file.html) {
+            const template = document.createElement('template')
+            template.innerHTML = file.html;
+            dom = template.content;
+        }
     }
 
     $: {
-        if (dom && htmlElement && dom.body.parentElement !== htmlElement) {
-            // this isn't supposed to be here, and its inline styles break everything!
-            const copyCodeButton = [...dom.getElementsByClassName('copy-code-button')];
-            copyCodeButton.forEach(el => el.remove());
-            
-            for (const anchor of dom.body.getElementsByClassName('internal-link')) {
+        if (dom && htmlElement) {
+            htmlElement.append(dom);
+
+            for (const anchor of htmlElement.getElementsByClassName('internal-link')) {
                 const href = anchor.getAttribute('href');
                 if (!href || href.includes('://')) continue;
 
-                let realPath = path.resolve(path.dirname(file!.filePath), decodeURI(href) + '.md');
-                
-                // strip leading slashes
-                realPath = realPath.replace(/^\/+/, '');
+                const realPath = makeUrl(file!.filePath, file!.vaultName, route, handle, decodeURI(href), passphrase);
 
                 console.log(anchor, href, realPath);
                 
                 // TODO passphrase support here
-                anchor.setAttribute('href', `#/page/${handle}/${hashFileName(`${realPath}:${file!.vaultName}`)}`);
+                anchor.setAttribute('href', realPath);
             }
+        }
+    }
 
-            htmlElement.append(...dom.body.childNodes);
+    $: {
+        if (!dom && htmlElement && file && textContent) {
+            const rendered = markdownRender(
+                textContent,
+                href => makeUrl(file!.filePath, file!.vaultName, route, handle, decodeURI(href), passphrase)
+            );
+
+            if (rendered.frontmatterYaml) {
+                const pre = document.createElement('pre');
+                pre.style.overflowX = 'scroll';
+                pre.append(rendered.frontmatterYaml);
+                htmlElement.append(pre);
+            }
+            htmlElement.append(rendered.element);
         }
     }
 </script>
@@ -69,16 +83,16 @@
                 <div bind:this={htmlElement} />
             </div>
         {:else if textContent}
-            <div class="vanilla-root">
+            <div class="obsidian-root">
                 <h1>{path.basename(file.filePath, '.md')}</h1>
                 <div class="text-content">
-                    {textContent}
+                    <div bind:this={htmlElement} />
                 </div>
             </div>
         {/if}
     {:catch err}
         <p>File load error:</p>
-        <pre>{err}</pre>
+        <pre style="overflow-x: scroll;">{err}</pre>
     {/await}
 </div>
 

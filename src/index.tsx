@@ -111,7 +111,7 @@ export default class MyPlugin extends Plugin {
                 }
 
                 window.open(
-                    `${ATMOSPHERE_CLIENT}/private-page/${encodeURI(this.settings.bskyHandle!)}/${hashFileName(getLocalFileRkey(activeFile, this.settings))}/${encodeURI(this.settings.passphrase)}`,
+                    `${ATMOSPHERE_CLIENT}/private-page/${encodeURI(this.settings.bskyHandle!)}/${hashFileName(getLocalFileRkey(activeFile, this.settings.passphrase))}/${encodeURI(this.settings.passphrase)}`,
                     '_blank',
                     'noopener,noreferrer',
                 );

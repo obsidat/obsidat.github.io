@@ -23,7 +23,9 @@ export async function encryptFileContents(data: ArrayBufferLike, passphrase: str
     }
 }
 
-export async function encryptFileName(file: TFile, passphrase: string): Promise<IoGithubObsidatFile.Record['path']> {
+export async function encryptFileName(file: TFile, passphrase: string):
+    Promise<IoGithubObsidatFile.Record['path']>
+{
     const encryptedFilePath = await encryptData(new TextEncoder().encode(`${file.vault.getName()}:${file.path}`), passphrase);
 
     return {

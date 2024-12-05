@@ -7,6 +7,32 @@
  *
  */
 
+/*!
+https://github.com/OliverBalfour/obsidian-pandoc
+
+MIT License
+
+Copyright (c) 2021 Oliver Balfour
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 import * as path from 'path';
 import * as fs from 'fs';
 import * as YAML from 'yaml';
@@ -75,6 +101,9 @@ export class MyMarkdownRenderer {
         // Post-process the HTML in-place
         await this.postProcessRenderedHTML(inputFile, wrapper, outputFormat,
             parentFiles, await this.mermaidCSS(this.vaultBasePath()));
+        
+        // Remove "copy code" buttons (they contain inline styles which break things)
+        wrapper.querySelectorAll('.copy-code-button').forEach(e => e.remove());
 
         let html = wrapper.innerHTML;
         document.body.removeChild(wrapper);
@@ -82,9 +111,9 @@ export class MyMarkdownRenderer {
         // If it's a top level note, make the HTML a standalone document - inject CSS, a <title>, etc.
         const metadata = this.getYAMLMetadata(markdown);
         metadata.title ??= this.fileBaseName(inputFile);
-        if (parentFiles.length === 0) {
-            html = await this.standaloneHTML(html, metadata.title, this.vaultBasePath());
-        }
+        // if (parentFiles.length === 0) {
+        //     html = await this.standaloneHTML(html, metadata.title, this.vaultBasePath());
+        // }
 
         return { html, metadata };
     }

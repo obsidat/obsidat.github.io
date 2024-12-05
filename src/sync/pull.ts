@@ -22,7 +22,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
 
-        file => hashFileName(getLocalFileRkey(file, settings)),
+        file => hashFileName(getLocalFileRkey(file, settings.passphrase)),
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
