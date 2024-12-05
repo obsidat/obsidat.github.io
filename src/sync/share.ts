@@ -43,7 +43,7 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
             console.log(`processing frontmatter for ${file.path}`);
             try {
                 await app.fileManager.processFrontMatter(file, (frontmatter) => {
-                    frontmatter["share-url"] = `${ATMOSPHERE_CLIENT}/page/${settings.bskyHandle}/${rkey}`;
+                    frontmatter["share-url"] = `${ATMOSPHERE_CLIENT}/page/${settings.bskyHandle}/${encodeURIComponent(rkey)}`;
                 });
             } catch (err) {
                 console.error('error processing frontmatter', err);

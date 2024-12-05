@@ -5,7 +5,9 @@ import "@atcute/client/lexicons";
 
 declare module "@atcute/client/lexicons" {
     namespace IoGithubObsidatFile {
-        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase stored in the settings of the atproto-obsidian-sync Obsidian plugin. Record Key is blake3 hash of `filePath || ':' || vaultName || ':' || passphrase || ':' || salt` The salt is currently hardcoded in the plugin but this may change in the future. */
+        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase stored in the settings of the atproto-obsidian-sync Obsidian plugin.
+Before encrypting, the passphrase is concatenated with this record's rkey to make it unique per-file.
+Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' || passphrase || ':' || salt` The salt is currently hardcoded in the plugin but this may change in the future. */
         interface Record {
             $type: "io.github.obsidat.file";
             /** The encrypted file contents. */
@@ -16,6 +18,10 @@ declare module "@atcute/client/lexicons" {
             path: IoGithubObsidatFile.InlineEncryptedData;
             /** This record's creation date. */
             recordCreatedAt: string;
+            /** An encrypted CBOR key-value mapping from internally linked file -> file passphrase. */
+            referencedFilePassphrases?: IoGithubObsidatFile.InlineEncryptedData;
+            /** A newer version file always overrides an older version file. `undefined` is the lowest version. */
+            version?: number;
         }
         /** A reference to a blob containing data encrypted using ACE Encryption */
         interface EncryptedData {
@@ -101,7 +107,7 @@ declare module "@atcute/client/lexicons" {
     }
 
     namespace IoGithubObsidatPublicFile {
-        /** An Obsidian file, publicly accessible with no encryption. Record Key is blake3 hash of `filePath || ':' || vaultName` */
+        /** An Obsidian file, publicly accessible with no encryption. Record Key is `lower(vaultName) || ':' || lower(filePath)` */
         interface Record {
             $type: "io.github.obsidat.publicFile";
             /** The contents of the file. */

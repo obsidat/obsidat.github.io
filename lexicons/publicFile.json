@@ -5,7 +5,7 @@
     "main": {
       "type": "record",
       "key": "any",
-      "description": "An Obsidian file, publicly accessible with no encryption. Record Key is blake3 hash of `filePath || ':' || vaultName`",
+      "description": "An Obsidian file, publicly accessible with no encryption. Record Key is `lower(vaultName) || ':' || lower(filePath)`",
       "record": {
         "type": "object",
         "required": [

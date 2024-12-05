@@ -18,7 +18,8 @@
 
     const filePromise = ApiClient.create(handle)
         .then(client => client.getAndDecryptFile(rkey, passphrase))
-        .then(afile => file = afile);
+        .then(afile => file = afile)
+        .catch(err => console.error(err));
     
     $: {
         textContent = typeof file?.contents === 'string'
@@ -58,7 +59,7 @@
         if (!dom && htmlElement && file && textContent) {
             const rendered = markdownRender(
                 textContent,
-                href => makeUrl(file!.filePath, file!.vaultName, route, handle, decodeURI(href), passphrase)
+                href => makeUrl(file!.filePath, file!.vaultName, route, handle, decodeURI(href), passphrase, file!.referencedFilePassphrases)
             );
 
             if (rendered.frontmatterYaml) {

@@ -1,8 +1,9 @@
 import { CredentialManager, XRPC } from '@atcute/client';
 import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from '@atcute/client/lexicons';
 import { getActorInfo } from '@parent/api-utils';
-import { decryptFileName, decryptFileContents, downloadFileContents } from '@parent/utils/crypto-utils';
+import { decryptFileName, decryptFileContents, downloadFileContents, decryptInlineData } from '@parent/utils/crypto-utils';
 import { detectMimeType } from '@parent/utils';
+import { decode as decodeCbor } from 'cbor-x';
 
 export class ApiClient {
     private constructor(
@@ -51,6 +52,9 @@ export class ApiClient {
                 mimeType: detectMimeType(filePath),
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
                 recordCreatedAt: new Date(file.recordCreatedAt),
+                referencedFilePassphrases: file.referencedFilePassphrases
+                    ? decodeCbor(await decryptInlineData(file.referencedFilePassphrases, passphrase)) as Record<string, string>
+                    : undefined
             };
         } else {
             const { uri, value: file } = await this.getFile(rkey);

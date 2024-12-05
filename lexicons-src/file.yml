@@ -7,7 +7,10 @@ defs:
     description: >-
       An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase
       stored in the settings of the atproto-obsidian-sync Obsidian plugin.
-      Record Key is blake3 hash of `filePath || ':' || vaultName || ':' || passphrase || ':' || salt`
+
+      Before encrypting, the passphrase is concatenated with this record's rkey to make it unique per-file.
+
+      Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' || passphrase || ':' || salt`
       The salt is currently hardcoded in the plugin but this may change in the future.
     record:
       type: object
@@ -17,6 +20,10 @@ defs:
         - recordCreatedAt
         - fileLastCreatedOrModified
       properties:
+        version:
+          type: integer
+          description: >-
+            A newer version file always overrides an older version file. `undefined` is the lowest version.
         body:
           type: ref
           ref: io.github.obsidat.file#encryptedData
@@ -27,6 +34,11 @@ defs:
           ref: io.github.obsidat.file#inlineEncryptedData
           description: >-
             The encrypted file path and vault name in the form `vaultName || ':' || filepath`
+        referencedFilePassphrases:
+          type: ref
+          ref: io.github.obsidat.file#inlineEncryptedData
+          description: >-
+            An encrypted CBOR key-value mapping from internally linked file -> file passphrase.
         recordCreatedAt:
           type: string
           format: datetime

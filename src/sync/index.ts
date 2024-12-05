@@ -17,3 +17,10 @@ export function getPublicFileRkey(file: TFile | { path: string, vaultName: strin
     // lowercase for case-insensitive file naming
     return `${'vaultName' in file ? file.vaultName : file.vault.getName()}:${file.path}`.toLowerCase();
 }
+
+export function getPerFilePassphrase(fileOrRkey: TFile | { path: string, vaultName: string } | string, passphrase: string) {
+    // TODO is it safe to use blake3 for this? should i switch to scrypt?
+    return hashToBase32(`${passphrase}${
+        typeof fileOrRkey === 'string' ? fileOrRkey : getLocalFileRkey(fileOrRkey, passphrase)
+    }`);
+}

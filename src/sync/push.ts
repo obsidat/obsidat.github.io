@@ -3,9 +3,12 @@ import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
 import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
 import { MyPluginSettings } from "..";
-import { getLocalFileRkey } from ".";
-import { encryptFileContents, encryptFileName } from "../utils/crypto-utils";
+import { getLocalFileRkey, getPerFilePassphrase } from ".";
+import { encryptFileContents, encryptFileName, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
+import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
+
+const VERSION = 2;
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
@@ -52,7 +55,9 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
     for (const [rkey, file] of localFilesByRkey.entries()) {
         const remoteFile = remoteFilesByRkey.get(rkey);
 
-        if (remoteFile) {
+        const remoteVersion = remoteFile?.version ?? -1;
+
+        if (remoteFile && remoteVersion >= VERSION) {
             if (settings.dontOverwriteNewFiles &&
                 new Date(remoteFile.fileLastCreatedOrModified).getTime() >= file.fileLastCreatedOrModified) {
                 // remote file is newer! dont overwrite!
@@ -62,15 +67,27 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
         const fileData = await file.vault.readBinary(file);
 
-        const [encryptedFileData, encryptedFilePath] = await Promise.all([
+        const linkPassphrases = app.metadataCache.resolvedLinks[file.path] ? Object.fromEntries(
+            Object.entries(app.metadataCache.resolvedLinks[file.path])
+                .map(([k]) => [k, [
+                    getLocalFileRkey({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
+                    getPerFilePassphrase({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
+                ]])
+        ) satisfies Record<string, [rkey: string, passphrase: string]> : undefined;
+
+        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
+
+        const [encryptedFileData, encryptedFilePath, encryptedLinkPassphrases] = await Promise.all([
             // TODO encode passphrase in file properties (how would we do this for binary files?)
-            encryptFileContents(fileData, settings.passphrase),
+            encryptFileContents(fileData, perFilePassPhrase),
 
             // TODO potentially check file paths for collisions
-            encryptFileName(file, settings.passphrase),
+            encryptFileName(file, perFilePassPhrase),
+
+            linkPassphrases ? encryptInlineData(encodeCbor(linkPassphrases), perFilePassPhrase) : undefined
         ]);
 
-        if (remoteFile) {
+        if (remoteFile && remoteVersion >= VERSION) {
             if (encryptedFileData.payload.byteLength === remoteFile.body.payload.size &&
                 isCidMatching(encryptedFileData.payload, remoteFile.body.payload)) {
                 // files are identical! dont upload!
@@ -91,6 +108,8 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
             path: encryptedFilePath,
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
+            referencedFilePassphrases: encryptedLinkPassphrases,
+            version: VERSION,
         } satisfies IoGithubObsidatFile.Record;
 
         writes.push({

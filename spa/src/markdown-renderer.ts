@@ -29,9 +29,17 @@ import markdownItFootnote from 'markdown-it-footnote';
 import markdownItLatex from 'markdown-it-latex';
 import { parse as parseYaml } from 'yaml';
 import path from 'path-browserify';
-import { getLocalFileRkey, getPublicFileRkey } from '@parent/sync';
+import { getLocalFileRkey, getPerFilePassphrase, getPublicFileRkey } from '@parent/sync';
 
-export function makeUrl(currentFile: string, currentVault: string, route: string, handle: string, filePath: string, passphrase?: string) {
+export function makeUrl(
+    currentFile: string,
+    currentVault: string,
+    route: string,
+    handle: string,
+    filePath: string,
+    passphrase?: string,
+    referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]>,
+) {
     if (filePath.includes('://')) return filePath;
 
     let realPath = path.resolve(path.dirname(currentFile), decodeURI(filePath) + '.md');
@@ -39,15 +47,21 @@ export function makeUrl(currentFile: string, currentVault: string, route: string
     // strip leading slashes
     realPath = realPath.replace(/^\/+/, '');
 
-    console.log(filePath, realPath);
-    
-    const url = `#/${route}/${handle}/${
-        passphrase
-            ? getLocalFileRkey({ path: realPath, vaultName: currentVault }, passphrase)
-            : getPublicFileRkey({ path: realPath, vaultName: currentVault })
-    }${passphrase ? `/${passphrase}` : ''}`;
+    console.log(filePath, realPath, referencedFilePassphrases);
 
-    return url;
+    if (passphrase) {
+        if (!referencedFilePassphrases || !((filePath + '.md') in referencedFilePassphrases)) {
+            console.log('unresolved link:', filePath);
+            return filePath;
+        }
+
+        // TODO filePath or realPath here? is this folder handling correct?
+        const [refRkey, refPassphrase] = referencedFilePassphrases[(filePath + '.md')];
+
+        return `#/${route}/${handle}/${refRkey}/${refPassphrase}`;
+    } else {
+        return `#/${route}/${handle}/${getPublicFileRkey({ path: realPath, vaultName: currentVault })}`;
+    }
 }
 
 export function markdownRender(markdown: string, makeUrl: (path: string) => string) {
