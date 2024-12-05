@@ -19,6 +19,9 @@ defs:
         body:
           type: blob
           description: The contents of the file.
+        html:
+          type: string
+          description: Rendered HTML contents of the file, for Markdown files.
         vaultName:
           type: string
           description: The name of the vault the file is stored in.

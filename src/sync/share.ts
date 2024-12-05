@@ -1,12 +1,13 @@
-import { App, Notice, TFile, arrayBufferToBase64 } from "obsidian";
+import { App, MarkdownView, Notice, TFile, arrayBufferToBase64 } from "obsidian";
 import { encryptData } from "../encryption";
 import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
-import { MyPluginSettings } from "..";
+import MyPlugin, { MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
+import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
 
-export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings, files: string[]) {
+export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings: MyPluginSettings, files: string[]) {
     const currentDate = new Date();
 
     const collection = 'io.github.obsidat.publicFile';
@@ -20,7 +21,9 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
 
     new Notice(`Sharing ${files.length} files to @${settings.bskyHandle}...`);
 
-    const localFileList = files.map(file => app.vault.getAbstractFileByPath(file));
+    const allFiles = new Map(app.vault.getAllLoadedFiles().map(e => [e.path, e]));
+
+    const localFileList = files.map(file => allFiles.get(file)!);
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
@@ -32,15 +35,34 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
     );
 
     for (const [rkey, file] of localFilesByRkey.entries()) {
-        if (file.extension === 'md' || file.extension === '.md') {
-            console.log(`processing frontmatter for ${file.path}`);
-            app.fileManager.processFrontMatter(file, (frontmatter) => {
-                frontmatter["share-url"] = `${ATMOSPHERE_CLIENT}/page/${settings.bskyHandle}/${rkey}`;
-            });
-            console.log(`processed frontmatter for ${file.path}`);
-        }
+        let renderedHtml: string | undefined;
 
         const fileData = await file.vault.readBinary(file);
+
+        if (file.extension === 'md' || file.extension === '.md') {
+            console.log(`processing frontmatter for ${file.path}`);
+            try {
+                await app.fileManager.processFrontMatter(file, (frontmatter) => {
+                    frontmatter["share-url"] = `${ATMOSPHERE_CLIENT}/page/${settings.bskyHandle}/${rkey}`;
+                });
+            } catch (err) {
+                console.error('error processing frontmatter', err);
+            }
+            console.log(`processed frontmatter for ${file.path}`);
+
+            const markdown = new TextDecoder().decode(fileData);
+
+            console.log(`decoded ${file.path}`);
+
+            ({ html: renderedHtml } = await new MyMarkdownRenderer(app, plugin, {
+                addExtensionsToInternalLinks: '',
+                displayYAMLFrontmatter: true,
+                customCSSFile: null,
+                highDPIDiagrams: true,
+                injectAppCSS: 'none',
+                linkStrippingBehaviour: 'link',
+            }).render({ data: markdown } as MarkdownView, markdown, file.path));
+        }
 
         const remoteFile = remoteFilesByRkey.get(rkey);
 
@@ -72,6 +94,7 @@ export async function doShare(agent: XRPC, app: App, settings: MyPluginSettings,
             frontmatter: toKeyValuePairs(fileCache?.frontmatter),
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
+            html: renderedHtml,
         } satisfies IoGithubObsidatPublicFile.Record;
 
         writes.push({

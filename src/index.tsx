@@ -161,7 +161,10 @@ export default class MyPlugin extends Plugin {
                     return allResolvedLinks;
                 };
 
-                const allResolvedLinks = recurseLinks(this.app.metadataCache.resolvedLinks[activeFile.path], {});
+                const allResolvedLinks = recurseLinks(
+                    this.app.metadataCache.resolvedLinks[activeFile.path],
+                    {[activeFile.path]: 1}
+                );
 
                 const settings = this.settings;
                 class VerifyPromptModal extends Modal {
@@ -176,7 +179,6 @@ export default class MyPlugin extends Plugin {
                             <p>
                                 This will make the following files PUBLICALLY VISIBLE ON THE AT PROTOCOL:
                                 <ul>
-                                    <li><b>{activeFile!.path}:</b> Main file</li>
                                     {Object.entries(allResolvedLinks).map(([k, v]) =>
                                         <li><b>{k}:</b> Linked to {v} times</li>
                                     )}
@@ -215,7 +217,7 @@ export default class MyPlugin extends Plugin {
                         reject();
                     }).open();
                 }).then(async () => {
-                    await doShare(await this.agent, this.app, this.settings, Object.keys(allResolvedLinks));
+                    await doShare(await this.agent, this.app, this, this.settings, Object.keys(allResolvedLinks));
                 });
             }
         });

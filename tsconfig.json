@@ -30,6 +30,6 @@
     "jsx": "react",
     "jsxFactory": "h"
   },
-  "include": [ "./src/**/*.ts", "./src/**/*.tsx", "./utils/**/*.ts" ],
+  "include": [ "./src/**/*.ts", "./src/**/*.tsx", "./utils/**/*.ts", "./utils/**/*.mts" ],
   "exclude": ["node_modules", "spa", "/main.js"],
 }

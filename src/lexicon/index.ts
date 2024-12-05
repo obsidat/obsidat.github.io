@@ -172,6 +172,8 @@ export declare namespace IoGithubObsidatPublicFile {
         description?: string;
         /** The Markdown frontmatter, serialized as an array of keyValuePair objects. Will be `undefined` for non-Markdown or non-textual files. */
         frontmatter?: IoGithubObsidatGeneric.KeyValuePair[];
+        /** Rendered HTML contents of the file, for Markdown files. */
+        html?: string;
         /** A list of pages this page links to, alongside the link count. */
         resolvedLinks?: IoGithubObsidatPublicFile.PageAndLinkCount[];
         /** Tags for the file, if any. */

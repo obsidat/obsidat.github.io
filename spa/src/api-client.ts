@@ -57,8 +57,7 @@ export class ApiClient {
             const contents = await downloadFileContents(this.did, this.pdsAgent, file);
     
             return {
-                vaultName: file.vaultName,
-                filePath: file.filePath,
+                ...file,
                 contents,
                 uri,
                 mimeType: file.body.mimeType,
