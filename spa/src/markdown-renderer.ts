@@ -29,7 +29,6 @@ import markdownItFootnote from 'markdown-it-footnote';
 import markdownItLatex from 'markdown-it-latex';
 import { parse as parseYaml } from 'yaml';
 import path from 'path-browserify';
-import { hashFileName } from '@parent/utils';
 import { getLocalFileRkey, getPublicFileRkey } from '@parent/sync';
 
 export function makeUrl(currentFile: string, currentVault: string, route: string, handle: string, filePath: string, passphrase?: string) {
@@ -42,11 +41,11 @@ export function makeUrl(currentFile: string, currentVault: string, route: string
 
     console.log(filePath, realPath);
     
-    const url = `#/${route}/${handle}/${hashFileName(
+    const url = `#/${route}/${handle}/${
         passphrase
             ? getLocalFileRkey({ path: realPath, vaultName: currentVault }, passphrase)
             : getPublicFileRkey({ path: realPath, vaultName: currentVault })
-    )}${passphrase ? `/${passphrase}` : ''}`;
+    }${passphrase ? `/${passphrase}` : ''}`;
 
     return url;
 }

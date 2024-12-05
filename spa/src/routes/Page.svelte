@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { hashFileName } from "@parent/utils";
     import { ApiClient } from "../api-client";
     import path from 'path-browserify';
     import { makeUrl, markdownRender } from "../markdown-renderer";

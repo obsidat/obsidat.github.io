@@ -1,8 +1,7 @@
-import { App, MarkdownView, Notice, TFile, arrayBufferToBase64 } from "obsidian";
-import { encryptData } from "../encryption";
-import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
+import { App, MarkdownView, Notice, TFile } from "obsidian";
+import { paginatedListRecords, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
 import { XRPC } from "@atcute/client";
-import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
+import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import MyPlugin, { MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
@@ -28,7 +27,7 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
-        file => hashFileName(getPublicFileRkey(file)),
+        file => getPublicFileRkey(file),
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),

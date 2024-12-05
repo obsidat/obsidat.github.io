@@ -217,3 +217,11 @@ export function arrayBufferToBase64(arrayBuffer: ArrayBufferLike) {
 export function base64ToArrayBuffer(string: string) {
     return fromString(string, 'base64');
 }
+
+export function toMap<K, T>(entries: T[], getKey: (entry: T) => K): Map<K, T>;
+export function toMap<K, V, T>(entries: T[], getKey: (entry: T) => K, getValue: (entry: T) => V): Map<K, V>;
+export function toMap<K, V, T>(entries: T[], getKey: (entry: T) => K, getValue?: (entry: T) => V): Map<K, V | T> {
+    return getValue
+        ? new Map(entries.map(entry => [getKey(entry), getValue(entry)]))
+        : new Map(entries.map(entry => [getKey(entry), entry]));
+}

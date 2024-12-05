@@ -1,7 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
-import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks } from "../utils";
+import { paginatedListRecords, isCidMatching, chunks } from "../utils";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
 import { encryptFileContents, encryptFileName } from "../crypto-utils";
@@ -26,7 +26,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
-        file => hashFileName(getLocalFileRkey(file, settings.passphrase)),
+        file => getLocalFileRkey(file, settings.passphrase),
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),

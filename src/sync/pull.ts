@@ -1,8 +1,7 @@
-import { App, Notice, TFile, arrayBufferToBase64, base64ToArrayBuffer } from "obsidian";
-import { decryptData, encryptData } from "../encryption";
-import { paginatedListRecords, hashFileName, isCidMatching, detectMimeType, chunks, splitFirst } from "../utils";
+import { App, Notice, TFile } from "obsidian";
+import { paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
-import { At, Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
+import { At } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey } from ".";
 import { decryptFileContents, decryptFileName, downloadFileContents } from "../crypto-utils";
@@ -22,7 +21,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
 
-        file => hashFileName(getLocalFileRkey(file, settings.passphrase)),
+        file => getLocalFileRkey(file, settings.passphrase),
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
