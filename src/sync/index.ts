@@ -10,7 +10,7 @@ const STATIC_SALT = toString(
 
 export function getLocalFileRkey(file: TFile | { path: string, vaultName: string }, passphrase: string) {
     // TODO is it safe to include passphrase here?
-    return hashFileName(`${file.path}:${'vaultName' in file ? file.vaultName : file.vault.getName()}:${passphrase}:${STATIC_SALT}`);
+    return hashFileName(`${file.path.toLowerCase()}:${('vaultName' in file ? file.vaultName : file.vault.getName()).toLowerCase()}:${passphrase}:${STATIC_SALT}`);
 }
 
 export function getPublicFileRkey(file: TFile | { path: string, vaultName: string }): string {
