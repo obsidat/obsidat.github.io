@@ -4,11 +4,11 @@ import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/c
 import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { encryptFileContents, encryptFileName, encryptInlineData } from "../utils/crypto-utils";
+import { encryptBlob, encryptFileName, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 
-const VERSION = 2;
+const VERSION = 3;
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
@@ -79,7 +79,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
         const [encryptedFileData, encryptedFilePath, encryptedLinkPassphrases] = await Promise.all([
             // TODO encode passphrase in file properties (how would we do this for binary files?)
-            encryptFileContents(fileData, perFilePassPhrase),
+            encryptBlob(fileData, perFilePassPhrase),
 
             // TODO potentially check file paths for collisions
             encryptFileName(file, perFilePassPhrase),
@@ -88,23 +88,20 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         ]);
 
         if (remoteFile && remoteVersion >= VERSION) {
-            if (encryptedFileData.payload.byteLength === remoteFile.body.payload.size &&
-                isCidMatching(encryptedFileData.payload, remoteFile.body.payload)) {
+            if (encryptedFileData.size === remoteFile.body.size &&
+                isCidMatching(await encryptedFileData.arrayBuffer(), remoteFile.body)) {
                 // files are identical! dont upload!
                 continue;
             }
         }
 
         const uploadBlobOutput = await agent.call('com.atproto.repo.uploadBlob', {
-            data: new Blob([encryptedFileData.payload], { type: 'application/octet-stream' })
+            data: encryptedFileData
         });
 
         const value = {
             $type: 'io.github.obsidat.file',
-            body: {
-                ...encryptedFileData.recordBody,
-                payload: uploadBlobOutput.data.blob,
-            },
+            body: uploadBlobOutput.data.blob,
             path: encryptedFilePath,
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),

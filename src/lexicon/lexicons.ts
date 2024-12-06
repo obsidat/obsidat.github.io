@@ -6,42 +6,22 @@ import "@atcute/client/lexicons";
 declare module "@atcute/client/lexicons" {
     namespace IoGithubObsidatFile {
         /** An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase stored in the settings of the atproto-obsidian-sync Obsidian plugin.
-Before encrypting, the passphrase is concatenated with this record's rkey to make it unique per-file.
+Before encrypting, the passphrase is concatenated as `passphrase || rkey` to make it unique per-file.
 Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' || passphrase || ':' || salt` The salt is currently hardcoded in the plugin but this may change in the future. */
         interface Record {
             $type: "io.github.obsidat.file";
-            /** The encrypted file contents. */
-            body: IoGithubObsidatFile.EncryptedData;
+            /** The AGE encrypted file contents. */
+            body: At.Blob;
             /** The file's creation or modification date. */
             fileLastCreatedOrModified: string;
-            /** The encrypted file path and vault name in the form `vaultName || ':' || filepath` */
-            path: IoGithubObsidatFile.InlineEncryptedData;
+            /** The AGE encrypted file path and vault name in the form `vaultName || ':' || filepath` */
+            path: At.Bytes;
             /** This record's creation date. */
             recordCreatedAt: string;
-            /** An encrypted CBOR key-value mapping from internally linked file -> file passphrase. */
-            referencedFilePassphrases?: IoGithubObsidatFile.InlineEncryptedData;
+            /** An AGE encrypted CBOR key-value mapping from internally linked file -> file passphrase. */
+            referencedFilePassphrases?: At.Bytes;
             /** A newer version file always overrides an older version file. `undefined` is the lowest version. */
             version?: number;
-        }
-        /** A reference to a blob containing data encrypted using ACE Encryption */
-        interface EncryptedData {
-            [Brand.Type]?: "io.github.obsidat.file#encryptedData";
-            /** The ACE textual header. */
-            header: string;
-            /** A cryptographically random, non-repeating initialization vector (IV). */
-            nonce: At.Bytes;
-            /** The blob containing the ciphertext. */
-            payload: At.Blob;
-        }
-        /** A data field encrypted using ACE Encryption */
-        interface InlineEncryptedData {
-            [Brand.Type]?: "io.github.obsidat.file#inlineEncryptedData";
-            /** The ACE textual header. */
-            header: string;
-            /** A cryptographically random, non-repeating initialization vector (IV). */
-            nonce: At.Bytes;
-            /** The ciphertext. */
-            payload: At.Bytes;
         }
     }
 

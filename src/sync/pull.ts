@@ -4,7 +4,7 @@ import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
 import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { decryptFileContents, decryptFileName, downloadFileContents } from "../utils/crypto-utils";
+import { decryptBlob, decryptFileName, downloadFileBlob } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
@@ -60,15 +60,14 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         }
 
         // TODO encode passphrase in file properties (how would we do this for binary files?)
-        const encryptedFileData = await downloadFileContents(
+        const encryptedFileData = await downloadFileBlob(
             did,
             agent,
             remoteFile
         );
 
-        const fileData = await decryptFileContents(
+        const fileData = await decryptBlob(
             encryptedFileData,
-            remoteFile,
             perFilePassPhrase
         );
 
