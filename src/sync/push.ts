@@ -3,10 +3,11 @@ import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
 import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
 import { MyPluginSettings } from "..";
-import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { encryptFileContents, encryptFileName, encryptInlineData } from "../utils/crypto-utils";
+import { getLocalFileRkey } from ".";
+import { encryptFileName, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
+import { encryptData } from "../encryption";
 
 const VERSION = 2;
 
@@ -78,8 +79,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
 
         const [encryptedFileData, encryptedFilePath, encryptedLinkPassphrases] = await Promise.all([
-            // TODO encode passphrase in file properties (how would we do this for binary files?)
-            encryptFileContents(fileData, perFilePassPhrase),
+            encryptData(new Uint8Array(fileData), keyAndSalt),
 
             // TODO potentially check file paths for collisions
             encryptFileName(file, perFilePassPhrase),
@@ -96,15 +96,12 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         }
 
         const uploadBlobOutput = await agent.call('com.atproto.repo.uploadBlob', {
-            data: new Blob([encryptedFileData.payload], { type: 'application/octet-stream' })
+            data: new Blob([encryptedFileData], { type: 'application/octet-stream' })
         });
 
         const value = {
             $type: 'io.github.obsidat.file',
-            body: {
-                ...encryptedFileData.recordBody,
-                payload: uploadBlobOutput.data.blob,
-            },
+            body: encryptedFileData.recordBody,
             path: encryptedFilePath,
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),

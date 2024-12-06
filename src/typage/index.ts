@@ -45,7 +45,7 @@ export class Encrypter {
     this.passphrase = s
   }
 
-  generateKeyAndSalt(passphrase: string): KeyAndSalt {    
+  generateKeyWithSalt(passphrase: string): KeyAndSalt {    
     return generateKeyAndSalt(passphrase, this.scryptWorkFactor)
   }
   

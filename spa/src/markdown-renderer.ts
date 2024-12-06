@@ -29,7 +29,7 @@ import markdownItFootnote from 'markdown-it-footnote';
 import markdownItLatex from 'markdown-it-latex';
 import { parse as parseYaml } from 'yaml';
 import path from 'path-browserify';
-import { getLocalFileRkey, getPerFilePassphrase, getPublicFileRkey } from '@parent/sync';
+import { getLocalFileRkey, getPerFileKeyAndSalt, getPublicFileRkey } from '@parent/sync';
 
 export function makeUrl(
     currentFile: string,

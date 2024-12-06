@@ -58,7 +58,7 @@ export function generateKeyAndSalt(passphrase: string, logN: number) {
     return { key, salt };
 }
 
-export interface KeyAndSalt { key: Uint8Array, salt: Uint8Array };
+export interface KeyAndSalt { key: Uint8Array, salt: Uint8Array }
 
 export function scryptWrap(fileKey: Uint8Array, passphraseOrKeyAndSalt: string | KeyAndSalt, logN: number): Stanza {
     const { key, salt } = typeof passphraseOrKeyAndSalt === 'string'

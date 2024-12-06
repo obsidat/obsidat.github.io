@@ -1,7 +1,7 @@
 import { CredentialManager, XRPC } from '@atcute/client';
 import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from '@atcute/client/lexicons';
 import { getActorInfo } from '@parent/api-utils';
-import { decryptFileName, decryptFileContents, downloadFileContents, decryptInlineData } from '@parent/utils/crypto-utils';
+import { decryptAtBytes, decryptFileName, downloadFileContents } from '@parent/utils/crypto-utils';
 import { detectMimeType } from '@parent/utils';
 import { decode as decodeCbor } from 'cbor-x';
 
@@ -42,7 +42,7 @@ export class ApiClient {
     
             const [vaultName, filePath] = await decryptFileName(file, passphrase);
             const encryptedContents = await downloadFileContents(this.did, this.pdsAgent, file);
-            const contents = await decryptFileContents(encryptedContents, file, passphrase);
+            const contents = await decryptAtBytes(encryptedContents, file, passphrase);
     
             return {
                 vaultName,
@@ -53,7 +53,7 @@ export class ApiClient {
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
                 recordCreatedAt: new Date(file.recordCreatedAt),
                 referencedFilePassphrases: file.referencedFilePassphrases
-                    ? decodeCbor(await decryptInlineData(file.referencedFilePassphrases, passphrase)) as Record<string, [rkey: string, passphrase: string]>
+                    ? decodeCbor(await decryptAtBytes(file.referencedFilePassphrases, passphrase)) as Record<string, [rkey: string, passphrase: string]>
                     : undefined
             };
         } else {

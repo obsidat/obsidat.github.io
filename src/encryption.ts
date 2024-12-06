@@ -20,31 +20,16 @@ export async function encryptData(data: Uint8Array, passphraseOrKeyAndSalt?: str
         e.setPassphrase(passphraseOrKeyAndSalt);
     else
         e.setKeyAndSalt(passphraseOrKeyAndSalt.key, passphraseOrKeyAndSalt.salt);
-    const { header, nonce, payload } = await e.encryptAsParts(data);
-    
-    return { header: new TextDecoder().decode(header), nonce, payload };
+
+    return await e.encrypt(data);
 }
 
-export async function decryptData({ header: headerText, nonce, payload }: {
-    header: string;
-    nonce: Uint8Array;
-    payload: Uint8Array;
-}, passphraseOrKey: string | Uint8Array) {
+export async function decryptData(ciphertext: Uint8Array, passphraseOrKey: string | Uint8Array) {
     const e = new Decrypter();
     if (typeof passphraseOrKey === 'string')
         e.addPassphrase(passphraseOrKey);
     else
         e.addKey(passphraseOrKey);
-    
-    const header = new TextEncoder().encode(headerText);
-    
-    // TODO improve this nonsense...
-    const ciphertext = new Uint8Array(header.length + nonce.length + payload.length);
-    ciphertext.set(header);
-    ciphertext.set(nonce, header.length);
-    ciphertext.set(payload, header.length + nonce.length);
 
-    const plaintext = await e.decrypt(ciphertext);
-    
-    return plaintext;
+    return await e.decrypt(ciphertext);
 }

@@ -10,7 +10,7 @@ import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
 import { ATMOSPHERE_CLIENT, Awaitable } from "./utils/index.ts";
 import { doPush } from "./sync/push.ts";
-import { getLocalFileRkey, getPerFilePassphrase } from "./sync/index.ts";
+import { getLocalFileRkey, getPerFileKeyAndSalt } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
 import { doShare } from './sync/share.ts';
 
@@ -116,7 +116,7 @@ export default class MyPlugin extends Plugin {
                     }/${
                         getLocalFileRkey(activeFile, this.settings.passphrase)
                     }/${
-                        getPerFilePassphrase(activeFile, this.settings.passphrase)
+                        getPerFileKeyAndSalt(activeFile, this.settings.passphrase)
                     }`,
                     '_blank',
                     'noopener,noreferrer',

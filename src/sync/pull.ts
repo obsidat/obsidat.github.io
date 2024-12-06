@@ -3,8 +3,8 @@ import { hashToBase32, paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
-import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { decryptFileContents, decryptFileName, downloadFileContents } from "../utils/crypto-utils";
+import { getLocalFileRkey, getPerFileKeyAndSalt } from ".";
+import { decryptAtBytes, decryptFileName, downloadFileContents } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
@@ -49,7 +49,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
             }
         }
 
-        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
+        const perFilePassPhrase = getPerFileKeyAndSalt(rkey, settings.passphrase);
 
         // TODO potentially check file paths for collisions
         const [vaultName, filePath] = await decryptFileName(remoteFile, perFilePassPhrase);
@@ -66,7 +66,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
             remoteFile
         );
 
-        const fileData = await decryptFileContents(
+        const fileData = await decryptAtBytes(
             encryptedFileData,
             remoteFile,
             perFilePassPhrase

@@ -1,6 +1,8 @@
 import { type TFile } from "obsidian";
 import { toString } from 'uint8arrays/to-string'
 import { hashToBase32 } from "../utils";
+import { KeyAndSalt } from "../typage/recipients";
+import { getEncryptionKeyAndSalt } from "../encryption";
 
 // TODO: maybe wanna make this per-repo? or is that unnecessary?
 const STATIC_SALT = toString(
@@ -18,9 +20,9 @@ export function getPublicFileRkey(file: TFile | { path: string, vaultName: strin
     return `${'vaultName' in file ? file.vaultName : file.vault.getName()}:${file.path}`.toLowerCase();
 }
 
-export function getPerFilePassphrase(fileOrRkey: TFile | { path: string, vaultName: string } | string, passphrase: string) {
+export function getPerFileKeyAndSalt(fileOrRkey: TFile | { path: string, vaultName: string } | string, passphrase: string): KeyAndSalt {
     // TODO is it safe to use blake3 for this? should i switch to scrypt?
-    return hashToBase32(`${passphrase}${
+    return getEncryptionKeyAndSalt(`${passphrase}${
         typeof fileOrRkey === 'string' ? fileOrRkey : getLocalFileRkey(fileOrRkey, passphrase)
     }`);
 }
