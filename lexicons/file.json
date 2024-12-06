@@ -20,18 +20,15 @@
             "description": "A newer version file always overrides an older version file. `undefined` is the lowest version."
           },
           "body": {
-            "type": "ref",
-            "ref": "io.github.obsidat.file#encryptedData",
+            "type": "blob",
             "description": "The encrypted file contents."
           },
           "path": {
-            "type": "ref",
-            "ref": "io.github.obsidat.file#inlineEncryptedData",
+            "type": "bytes",
             "description": "The encrypted file path and vault name in the form `vaultName || ':' || filepath`"
           },
           "referencedFilePassphrases": {
-            "type": "ref",
-            "ref": "io.github.obsidat.file#inlineEncryptedData",
+            "type": "bytes",
             "description": "An encrypted CBOR key-value mapping from internally linked file -> file passphrase."
           },
           "recordCreatedAt": {
@@ -43,52 +40,6 @@
             "type": "string",
             "description": "The file's creation or modification date."
           }
-        }
-      }
-    },
-    "encryptedData": {
-      "type": "object",
-      "required": [
-        "header",
-        "nonce",
-        "payload"
-      ],
-      "description": "A reference to a blob containing data encrypted using ACE Encryption",
-      "properties": {
-        "header": {
-          "type": "string",
-          "description": "The ACE textual header."
-        },
-        "nonce": {
-          "type": "bytes",
-          "description": "A cryptographically random, non-repeating initialization vector (IV)."
-        },
-        "payload": {
-          "type": "blob",
-          "description": "The blob containing the ciphertext."
-        }
-      }
-    },
-    "inlineEncryptedData": {
-      "type": "object",
-      "required": [
-        "header",
-        "nonce",
-        "payload"
-      ],
-      "description": "A data field encrypted using ACE Encryption",
-      "properties": {
-        "header": {
-          "type": "string",
-          "description": "The ACE textual header."
-        },
-        "nonce": {
-          "type": "bytes",
-          "description": "A cryptographically random, non-repeating initialization vector (IV)."
-        },
-        "payload": {
-          "type": "bytes",
-          "description": "The ciphertext."
         }
       }
     }

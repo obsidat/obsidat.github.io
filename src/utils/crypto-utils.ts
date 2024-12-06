@@ -4,13 +4,16 @@ import { decryptData, encryptData } from "../encryption";
 import { arrayBufferToBase64, base64ToArrayBuffer, splitFirst } from ".";
 import { getPdsEndpoint, type DidDocument } from "@atcute/client/utils/did";
 import { type TFile } from "obsidian";
+import { KeyAndSalt } from "../typage/recipients";
 
-export async function encryptFileContents(data: ArrayBufferLike, passphrase: string): Promise<{
+export async function encryptFileContents(data: ArrayBufferLike, keyAndSalt: KeyAndSalt): Promise<{
     payload: Uint8Array,
     recordBody: Omit<IoGithubObsidatFile.EncryptedData, 'payload'>,
 }> {
     // TODO encode passphrase in file properties (how would we do this for binary files?)
-    const encryptedFileData = await encryptData(new Uint8Array(data), passphrase);
+    const encryptedFileData = await encryptData(
+        new Uint8Array(data), keyAndSalt
+    );
 
     return {
         payload: encryptedFileData.payload,
@@ -23,21 +26,21 @@ export async function encryptFileContents(data: ArrayBufferLike, passphrase: str
     }
 }
 
-export async function encryptFileName(file: TFile, passphrase: string):
+export async function encryptFileName(file: TFile, keyAndSalt: KeyAndSalt):
     Promise<IoGithubObsidatFile.InlineEncryptedData>
 {
     return await encryptInlineData(
         new TextEncoder().encode(`${file.vault.getName()}:${file.path}`),
-        passphrase
+        keyAndSalt
     );
 }
 
-export async function encryptInlineData(data: ArrayBufferLike, passphrase: string):
+export async function encryptInlineData(data: ArrayBufferLike, keyAndSalt: KeyAndSalt):
     Promise<IoGithubObsidatFile.InlineEncryptedData>
 {
     const encryptedFilePath = await encryptData(
         new Uint8Array(data),
-        passphrase
+        keyAndSalt
     );
 
     return {
@@ -51,20 +54,20 @@ export async function encryptInlineData(data: ArrayBufferLike, passphrase: strin
     }
 }
 
-export async function decryptFileName(remoteFile: IoGithubObsidatFile.Record, passphrase: string): Promise<readonly [vaultName: string, filePath: string]> {
-    const [vaultName, filePath] = await decryptInlineData(remoteFile.path, passphrase)
+export async function decryptFileName(remoteFile: IoGithubObsidatFile.Record, key: Uint8Array): Promise<readonly [vaultName: string, filePath: string]> {
+    const [vaultName, filePath] = await decryptInlineData(remoteFile.path, key)
         .then(e => new TextDecoder().decode(e))
         .then(e => splitFirst(e, ':'));
 
     return [vaultName, filePath] as const;
 }
 
-export async function decryptInlineData(data: IoGithubObsidatFile.InlineEncryptedData, passphrase: string) {
+export async function decryptInlineData(data: At.Bytes, key: Uint8Array) {
     return await decryptData({
         header: data.header,
         nonce: base64ToArrayBuffer(data.nonce.$bytes),
         payload: base64ToArrayBuffer(data.payload.$bytes),
-    }, passphrase)
+    }, key);
 }
 
 export async function downloadFileContents(did: At.DID, agent: XRPC, remoteFile: IoGithubObsidatFile.Record | IoGithubObsidatPublicFile.Record) {
@@ -78,7 +81,7 @@ export async function downloadFileContents(did: At.DID, agent: XRPC, remoteFile:
     return fileDataResponse.data;
 }
 
-export async function decryptFileContents(data: Uint8Array, remoteFile: IoGithubObsidatFile.Record, passphrase: string) {
+export async function decryptFileContents(data: Uint8Array, remoteFile: IoGithubObsidatFile.Record, key: Uint8Array) {
     const fileData = await decryptData({
         header: remoteFile.body.header,
         nonce: base64ToArrayBuffer(remoteFile.body.nonce.$bytes),

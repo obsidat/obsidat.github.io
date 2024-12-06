@@ -61,37 +61,17 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
     interface Record {
         $type: "io.github.obsidat.file";
         /** The encrypted file contents. */
-        body: IoGithubObsidatFile.EncryptedData;
+        body: At.Blob;
         /** The file's creation or modification date. */
         fileLastCreatedOrModified: string;
         /** The encrypted file path and vault name in the form `vaultName || ':' || filepath` */
-        path: IoGithubObsidatFile.InlineEncryptedData;
+        path: At.Bytes;
         /** This record's creation date. */
         recordCreatedAt: string;
         /** An encrypted CBOR key-value mapping from internally linked file -> file passphrase. */
-        referencedFilePassphrases?: IoGithubObsidatFile.InlineEncryptedData;
+        referencedFilePassphrases?: At.Bytes;
         /** A newer version file always overrides an older version file. `undefined` is the lowest version. */
         version?: number;
-    }
-    /** A reference to a blob containing data encrypted using ACE Encryption */
-    interface EncryptedData {
-        [Brand.Type]?: "io.github.obsidat.file#encryptedData";
-        /** The ACE textual header. */
-        header: string;
-        /** A cryptographically random, non-repeating initialization vector (IV). */
-        nonce: At.Bytes;
-        /** The blob containing the ciphertext. */
-        payload: At.Blob;
-    }
-    /** A data field encrypted using ACE Encryption */
-    interface InlineEncryptedData {
-        [Brand.Type]?: "io.github.obsidat.file#inlineEncryptedData";
-        /** The ACE textual header. */
-        header: string;
-        /** A cryptographically random, non-repeating initialization vector (IV). */
-        nonce: At.Bytes;
-        /** The ciphertext. */
-        payload: At.Bytes;
     }
 }
 

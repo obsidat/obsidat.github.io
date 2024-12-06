@@ -2,28 +2,39 @@ import { CrockfordBase32 } from 'crockford-base32';
 import { Encrypter, Decrypter } from './typage/index.ts';
 import { randomBytes } from '@noble/hashes/utils';
 import { toBase32 } from './utils/index.ts';
+import { KeyAndSalt } from './typage/recipients.ts';
 
 export function generatePassphrase(bits = 256) {
     return toBase32(randomBytes(Math.max(1, (bits / 8) | 0)));
 }
 
-export async function encryptData(data: Uint8Array, passphrase?: string) {
-    passphrase ??= generatePassphrase();
+export function getEncryptionKeyAndSalt(passphrase: string): KeyAndSalt {
+    return new Encrypter().generateKeyAndSalt(passphrase);
+}
+
+export async function encryptData(data: Uint8Array, passphraseOrKeyAndSalt?: string | KeyAndSalt) {
+    passphraseOrKeyAndSalt ??= generatePassphrase();
 
     const e = new Encrypter();
-    e.setPassphrase(passphrase);
+    if (typeof passphraseOrKeyAndSalt === 'string')
+        e.setPassphrase(passphraseOrKeyAndSalt);
+    else
+        e.setKeyAndSalt(passphraseOrKeyAndSalt.key, passphraseOrKeyAndSalt.salt);
     const { header, nonce, payload } = await e.encryptAsParts(data);
     
-    return { passphrase, header: new TextDecoder().decode(header), nonce, payload };
+    return { header: new TextDecoder().decode(header), nonce, payload };
 }
 
 export async function decryptData({ header: headerText, nonce, payload }: {
     header: string;
     nonce: Uint8Array;
     payload: Uint8Array;
-}, passphrase: string) {
+}, passphraseOrKey: string | Uint8Array) {
     const e = new Decrypter();
-    e.addPassphrase(passphrase);
+    if (typeof passphraseOrKey === 'string')
+        e.addPassphrase(passphraseOrKey);
+    else
+        e.addKey(passphraseOrKey);
     
     const header = new TextEncoder().encode(headerText);
     

@@ -4,7 +4,7 @@ import { hkdf } from "@noble/hashes/hkdf"
 import { sha256 } from "@noble/hashes/sha256"
 import { randomBytes } from "@noble/hashes/utils"
 import * as x25519 from "./x25519.ts"
-import { scryptUnwrap, scryptWrap, x25519Identity, x25519Unwrap, x25519Wrap } from "./recipients.ts"
+import { generateKeyAndSalt, KeyAndSalt, scryptUnwrap, scryptWrap, x25519Identity, x25519Unwrap, x25519Wrap } from "./recipients.ts"
 import { encodeHeader, encodeHeaderNoMAC, parseHeader, Stanza } from "./format.ts"
 import { decryptSTREAM, encryptSTREAM } from "./stream.ts"
 
@@ -35,6 +35,7 @@ export class Encrypter {
   private passphrase: string | null = null
   private scryptWorkFactor = 18
   private recipients: Uint8Array[] = []
+  private keyAndSalt: KeyAndSalt | null = null;
 
   setPassphrase(s: string): void {
     if (this.passphrase !== null)
@@ -44,12 +45,22 @@ export class Encrypter {
     this.passphrase = s
   }
 
+  generateKeyAndSalt(passphrase: string): KeyAndSalt {    
+    return generateKeyAndSalt(passphrase, this.scryptWorkFactor)
+  }
+  
+  setKeyAndSalt(key: Uint8Array, salt: Uint8Array): void {
+    if (this.passphrase !== null || this.keyAndSalt !== null)
+      throw new Error("can encrypt to at most one passphrase")
+    this.keyAndSalt = { key, salt };
+  }
+
   setScryptWorkFactor(logN: number): void {
     this.scryptWorkFactor = logN
   }
 
   addRecipient(s: string): void {
-    if (this.passphrase !== null)
+    if (this.passphrase !== null || this.keyAndSalt !== null)
       throw new Error("can't encrypt to both recipients and passphrases")
     const res = bech32.decodeToBytes(s)
     if (!s.startsWith("age1") ||
@@ -79,6 +90,9 @@ export class Encrypter {
     for (const recipient of this.recipients) {
       stanzas.push(await x25519Wrap(fileKey, recipient))
     }
+    if (this.keyAndSalt !== null) {
+      stanzas.push(scryptWrap(fileKey, this.keyAndSalt, this.scryptWorkFactor))
+    }
     if (this.passphrase !== null) {
       stanzas.push(scryptWrap(fileKey, this.passphrase, this.scryptWorkFactor))
     }
@@ -98,9 +112,14 @@ export class Encrypter {
 export class Decrypter {
   private passphrases: string[] = []
   private identities: x25519Identity[] = []
+  private keys: Uint8Array[] = []
 
   addPassphrase(s: string): void {
     this.passphrases.push(s)
+  }
+
+  addKey(passphraseOrKey: Uint8Array) {
+      this.keys.push(passphraseOrKey)
   }
 
   addIdentity(s: string | CryptoKey): void {
@@ -153,6 +172,11 @@ export class Decrypter {
       // this is a very simple implementation with no public identity interface.
       if (s.args.length > 0 && s.args[0] === "scrypt" && recipients.length !== 1) {
         throw Error("scrypt recipient is not the only one in the header")
+      }
+
+      for (const tk of this.keys) {
+        const k = scryptUnwrap(s, tk);
+        if (k !== null) { return k }
       }
 
       for (const p of this.passphrases) {

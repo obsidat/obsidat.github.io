@@ -47,18 +47,28 @@ export async function x25519Unwrap(s: Stanza, i: x25519Identity): Promise<Uint8A
     return decryptFileKey(s.body, key)
 }
 
-export function scryptWrap(fileKey: Uint8Array, passphrase: string, logN: number): Stanza {
+export function generateKeyAndSalt(passphrase: string, logN: number) {
     const salt = randomBytes(16)
     const label = "age-encryption.org/v1/scrypt"
     const labelAndSalt = new Uint8Array(label.length + 16)
     labelAndSalt.set(new TextEncoder().encode(label))
     labelAndSalt.set(salt, label.length)
+    
+    const key = scrypt(passphrase, labelAndSalt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 });
+    return { key, salt };
+}
 
-    const key = scrypt(passphrase, labelAndSalt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 })
+export interface KeyAndSalt { key: Uint8Array, salt: Uint8Array };
+
+export function scryptWrap(fileKey: Uint8Array, passphraseOrKeyAndSalt: string | KeyAndSalt, logN: number): Stanza {
+    const { key, salt } = typeof passphraseOrKeyAndSalt === 'string'
+        ? generateKeyAndSalt(passphraseOrKeyAndSalt, logN)
+        : passphraseOrKeyAndSalt;
+
     return new Stanza(["scrypt", base64nopad.encode(salt), logN.toString()], encryptFileKey(fileKey, key))
 }
 
-export function scryptUnwrap(s: Stanza, passphrase: string): Uint8Array | null {
+export function scryptUnwrap(s: Stanza, passphraseOrKey: string | Uint8Array): Uint8Array | null {
     if (s.args.length < 1 || s.args[0] !== "scrypt") {
         return null
     }
@@ -83,7 +93,10 @@ export function scryptUnwrap(s: Stanza, passphrase: string): Uint8Array | null {
     labelAndSalt.set(new TextEncoder().encode(label))
     labelAndSalt.set(salt, label.length)
 
-    const key = scrypt(passphrase, labelAndSalt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 })
+    const key = typeof passphraseOrKey === 'string'
+        ? scrypt(passphraseOrKey, labelAndSalt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 })
+        : passphraseOrKey;
+
     return decryptFileKey(s.body, key)
 }
 
