@@ -1,9 +1,10 @@
 import { CredentialManager, XRPC } from '@atcute/client';
 import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from '@atcute/client/lexicons';
 import { getActorInfo } from '@parent/api-utils';
-import { decryptFileName, decryptBlob, downloadFileBlob, decryptInlineData } from '@parent/utils/crypto-utils';
+import { decryptBlob, downloadFileBlob, decryptInlineData } from '@parent/utils/crypto-utils';
 import { detectMimeType } from '@parent/utils';
 import { decode as decodeCbor } from 'cbor-x';
+import type { EncryptedMetadata } from '@parent/sync';
 
 export class ApiClient {
     private constructor(
@@ -40,7 +41,9 @@ export class ApiClient {
         if (passphrase !== undefined) {
             const { uri, value: file } = await this.getFile(rkey, passphrase);
     
-            const [vaultName, filePath] = await decryptFileName(file, passphrase);
+            const { vaultName, filePath, referencedFilePassphrases } = decodeCbor(
+                await decryptInlineData(file.metadata, passphrase)
+            ) as EncryptedMetadata;
             const encryptedContents = await downloadFileBlob(this.did, this.pdsAgent, file);
             const contents = await decryptBlob(encryptedContents, passphrase);
     
@@ -52,9 +55,7 @@ export class ApiClient {
                 mimeType: detectMimeType(filePath),
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
                 recordCreatedAt: new Date(file.recordCreatedAt),
-                referencedFilePassphrases: file.referencedFilePassphrases
-                    ? decodeCbor(await decryptInlineData(file.referencedFilePassphrases, passphrase)) as Record<string, [rkey: string, passphrase: string]>
-                    : undefined
+                referencedFilePassphrases
             };
         } else {
             const { uri, value: file } = await this.getFile(rkey);

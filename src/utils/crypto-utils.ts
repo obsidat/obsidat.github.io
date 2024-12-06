@@ -11,13 +11,6 @@ export async function encryptBlob(data: ArrayBufferLike, passphrase: string): Pr
     return new Blob([encryptedData], { type: 'application/octet-stream' });
 }
 
-export async function encryptFileName(file: TFile, passphrase: string): Promise<At.Bytes> {
-    return await encryptInlineData(
-        new TextEncoder().encode(`${file.vault.getName()}:${file.path}`),
-        passphrase
-    );
-}
-
 export async function encryptInlineData(data: ArrayBufferLike, passphrase: string): Promise<At.Bytes> {
     const encryptedData = await encryptData(
         new Uint8Array(data),
@@ -27,14 +20,6 @@ export async function encryptInlineData(data: ArrayBufferLike, passphrase: strin
     return {
         $bytes: arrayBufferToBase64(encryptedData),
     };
-}
-
-export async function decryptFileName(remoteFile: IoGithubObsidatFile.Record, passphrase: string): Promise<readonly [vaultName: string, filePath: string]> {
-    const [vaultName, filePath] = await decryptInlineData(remoteFile.path, passphrase)
-        .then(e => new TextDecoder().decode(e))
-        .then(e => splitFirst(e, ':'));
-
-    return [vaultName, filePath] as const;
 }
 
 export async function decryptInlineData(data: At.Bytes, passphrase: string) {

@@ -10,7 +10,7 @@
         "type": "object",
         "required": [
           "body",
-          "path",
+          "metadata",
           "recordCreatedAt",
           "fileLastCreatedOrModified"
         ],
@@ -23,13 +23,9 @@
             "type": "blob",
             "description": "The AGE encrypted file contents."
           },
-          "path": {
+          "metadata": {
             "type": "bytes",
-            "description": "The AGE encrypted file path and vault name in the form `vaultName || ':' || filepath`"
-          },
-          "referencedFilePassphrases": {
-            "type": "bytes",
-            "description": "An AGE encrypted CBOR key-value mapping from internally linked file -> file passphrase."
+            "description": "The AGE encrypted CBOR record containing file metadata following the EncryptedMetadata interface specification in `src\\sync\\index.ts`"
           },
           "recordCreatedAt": {
             "type": "string",

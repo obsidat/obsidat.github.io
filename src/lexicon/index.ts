@@ -64,12 +64,10 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
         body: At.Blob;
         /** The file's creation or modification date. */
         fileLastCreatedOrModified: string;
-        /** The AGE encrypted file path and vault name in the form `vaultName || ':' || filepath` */
-        path: At.Bytes;
+        /** The AGE encrypted CBOR record containing file metadata following the EncryptedMetadata interface specification in `src\sync\index.ts` */
+        metadata: At.Bytes;
         /** This record's creation date. */
         recordCreatedAt: string;
-        /** An AGE encrypted CBOR key-value mapping from internally linked file -> file passphrase. */
-        referencedFilePassphrases?: At.Bytes;
         /** A newer version file always overrides an older version file. `undefined` is the lowest version. */
         version?: number;
     }

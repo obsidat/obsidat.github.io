@@ -3,9 +3,10 @@ import { hashToBase32, paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import { MyPluginSettings } from "..";
-import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { decryptBlob, decryptFileName, downloadFileBlob } from "../utils/crypto-utils";
+import { EncryptedMetadata, getLocalFileRkey, getPerFilePassphrase } from ".";
+import { decryptBlob, decryptInlineData, downloadFileBlob } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
+import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
     const collection = 'io.github.obsidat.file';
@@ -52,7 +53,9 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
 
         // TODO potentially check file paths for collisions
-        const [vaultName, filePath] = await decryptFileName(remoteFile, perFilePassPhrase);
+        const { vaultName, filePath } = decodeCbor(
+            await decryptInlineData(remoteFile.metadata, perFilePassPhrase)
+        ) as EncryptedMetadata;
 
         if (app.vault.getName() !== vaultName) {
             // vault mismatch!

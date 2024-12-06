@@ -3,12 +3,12 @@ import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
 import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
 import { MyPluginSettings } from "..";
-import { getLocalFileRkey, getPerFilePassphrase } from ".";
-import { encryptBlob, encryptFileName, encryptInlineData } from "../utils/crypto-utils";
+import { EncryptedMetadata, getLocalFileRkey, getPerFilePassphrase } from ".";
+import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 
-const VERSION = 3;
+const VERSION = 4;
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const currentDate = new Date();
@@ -67,24 +67,26 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
         const fileData = await file.vault.readBinary(file);
 
-        const linkPassphrases = app.metadataCache.resolvedLinks[file.path] ? Object.fromEntries(
+        const referencedFilePassphrases = app.metadataCache.resolvedLinks[file.path] ? Object.fromEntries(
             Object.entries(app.metadataCache.resolvedLinks[file.path])
                 .map(([k]) => [k, [
                     getLocalFileRkey({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
                     getPerFilePassphrase({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
                 ]])
-        ) satisfies Record<string, [rkey: string, passphrase: string]> : undefined;
+        ) satisfies EncryptedMetadata['referencedFilePassphrases'] : undefined;
 
         const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
 
-        const [encryptedFileData, encryptedFilePath, encryptedLinkPassphrases] = await Promise.all([
+        const [encryptedFileData, encryptedFileMeta] = await Promise.all([
             // TODO encode passphrase in file properties (how would we do this for binary files?)
             encryptBlob(fileData, perFilePassPhrase),
 
             // TODO potentially check file paths for collisions
-            encryptFileName(file, perFilePassPhrase),
-
-            linkPassphrases ? encryptInlineData(encodeCbor(linkPassphrases), perFilePassPhrase) : undefined
+            encryptInlineData(encodeCbor({
+                filePath: file.path,
+                vaultName: file.vault.getName(),
+                referencedFilePassphrases
+            } satisfies EncryptedMetadata), perFilePassPhrase),
         ]);
 
         if (remoteFile && remoteVersion >= VERSION) {
@@ -102,10 +104,9 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         const value = {
             $type: 'io.github.obsidat.file',
             body: uploadBlobOutput.data.blob,
-            path: encryptedFilePath,
+            metadata: encryptedFileMeta,
             recordCreatedAt: currentDate.toISOString(),
             fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
-            referencedFilePassphrases: encryptedLinkPassphrases,
             version: VERSION,
         } satisfies IoGithubObsidatFile.Record;
 
