@@ -11,8 +11,7 @@
         "required": [
           "body",
           "metadata",
-          "recordCreatedAt",
-          "fileLastCreatedOrModified"
+          "recordCreatedAt"
         ],
         "properties": {
           "version": {
@@ -31,10 +30,6 @@
             "type": "string",
             "format": "datetime",
             "description": "This record's creation date."
-          },
-          "fileLastCreatedOrModified": {
-            "type": "string",
-            "description": "The file's creation or modification date."
           }
         }
       }

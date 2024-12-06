@@ -11,7 +11,7 @@ import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 const VERSION = 4;
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
-    const currentDate = new Date();
+    const uploadStartDate = new Date();
 
     const collection = 'io.github.obsidat.file';
 
@@ -59,7 +59,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
         if (remoteFile && remoteVersion >= VERSION) {
             if (settings.dontOverwriteNewFiles &&
-                new Date(remoteFile.fileLastCreatedOrModified).getTime() >= file.fileLastCreatedOrModified) {
+                new Date(remoteFile.recordCreatedAt) >= uploadStartDate) {
                 // remote file is newer! dont overwrite!
                 continue;
             }
@@ -85,7 +85,8 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
             encryptInlineData(encodeCbor({
                 filePath: file.path,
                 vaultName: file.vault.getName(),
-                referencedFilePassphrases
+                referencedFilePassphrases,
+                fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
             } satisfies EncryptedMetadata), perFilePassPhrase),
         ]);
 
@@ -105,8 +106,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
             $type: 'io.github.obsidat.file',
             body: uploadBlobOutput.data.blob,
             metadata: encryptedFileMeta,
-            recordCreatedAt: currentDate.toISOString(),
-            fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified).toISOString(),
+            recordCreatedAt: new Date().toISOString(),
             version: VERSION,
         } satisfies IoGithubObsidatFile.Record;
 

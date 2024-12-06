@@ -10,6 +10,7 @@ export interface EncryptedMetadata {
     vaultName: string;
     filePath: string;
     referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]>;
+    fileLastCreatedOrModified: Date;
 }
 
 // TODO: maybe wanna make this per-repo? or is that unnecessary?

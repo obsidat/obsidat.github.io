@@ -18,7 +18,6 @@ defs:
         - body
         - metadata
         - recordCreatedAt
-        - fileLastCreatedOrModified
       properties:
         version:
           type: integer
@@ -37,6 +36,3 @@ defs:
           type: string
           format: datetime
           description: This record's creation date.
-        fileLastCreatedOrModified:
-          type: string
-          description: The file's creation or modification date.

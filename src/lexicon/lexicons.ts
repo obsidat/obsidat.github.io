@@ -12,8 +12,6 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
             $type: "io.github.obsidat.file";
             /** The AGE encrypted file contents. */
             body: At.Blob;
-            /** The file's creation or modification date. */
-            fileLastCreatedOrModified: string;
             /** The AGE encrypted CBOR record containing file metadata following the EncryptedMetadata interface specification in `src\sync\index.ts` */
             metadata: At.Bytes;
             /** This record's creation date. */

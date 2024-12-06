@@ -42,20 +42,20 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     for (const [rkey, remoteFile] of remoteFilesByRkey.entries()) {
         const localFile = localFilesByRkey.get(rkey)!;
 
+        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
+
+        // TODO potentially check file paths for collisions
+        const { vaultName, filePath, fileLastCreatedOrModified } = decodeCbor(
+            await decryptInlineData(remoteFile.metadata, perFilePassPhrase)
+        ) as EncryptedMetadata;
+
         if (localFile) {
             if (settings.dontOverwriteNewFiles &&
-                localFile.fileLastCreatedOrModified >= new Date(remoteFile.fileLastCreatedOrModified).getTime() ) {
+                localFile.fileLastCreatedOrModified >= new Date(fileLastCreatedOrModified).getTime() ) {
                 // local file is newer! dont overwrite!
                 continue;
             }
         }
-
-        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
-
-        // TODO potentially check file paths for collisions
-        const { vaultName, filePath } = decodeCbor(
-            await decryptInlineData(remoteFile.metadata, perFilePassPhrase)
-        ) as EncryptedMetadata;
 
         if (app.vault.getName() !== vaultName) {
             // vault mismatch!
@@ -76,14 +76,14 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
 
         if (localFile) {
             await app.vault.modifyBinary(localFile, fileData, {
-                mtime: new Date(remoteFile.fileLastCreatedOrModified).getTime()
+                mtime: new Date(fileLastCreatedOrModified).getTime()
             });
         } else {
             // TODO need to create parent folder?
 
             await app.vault.createBinary(filePath, fileData, {
-                ctime: new Date(remoteFile.fileLastCreatedOrModified).getTime(),
-                mtime: new Date(remoteFile.fileLastCreatedOrModified).getTime()
+                ctime: new Date(fileLastCreatedOrModified).getTime(),
+                mtime: new Date(fileLastCreatedOrModified).getTime()
             });
         }
     }

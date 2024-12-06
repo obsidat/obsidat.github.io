@@ -41,7 +41,7 @@ export class ApiClient {
         if (passphrase !== undefined) {
             const { uri, value: file } = await this.getFile(rkey, passphrase);
     
-            const { vaultName, filePath, referencedFilePassphrases } = decodeCbor(
+            const { vaultName, filePath, referencedFilePassphrases, fileLastCreatedOrModified } = decodeCbor(
                 await decryptInlineData(file.metadata, passphrase)
             ) as EncryptedMetadata;
             const encryptedContents = await downloadFileBlob(this.did, this.pdsAgent, file);
@@ -53,7 +53,7 @@ export class ApiClient {
                 contents,
                 uri,
                 mimeType: detectMimeType(filePath),
-                fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
+                fileLastCreatedOrModified,
                 recordCreatedAt: new Date(file.recordCreatedAt),
                 referencedFilePassphrases
             };
