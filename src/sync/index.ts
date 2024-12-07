@@ -5,7 +5,10 @@ import { CborEntity, key } from "../utils/cbor";
 
 /**
  * Encrypted file metadata to be serialized as CBOR and encrypted with AGE to be included in the record as
- * an inline byte stream
+ * an inline byte stream.
+ * 
+ * The class is serialized as an array where the @key decorator determines the element index for each
+ * property.
  */
 export class EncryptedMetadata extends CborEntity<EncryptedMetadata> {
     @key(0)
