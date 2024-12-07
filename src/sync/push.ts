@@ -8,7 +8,7 @@ import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 
-const VERSION = 5;
+const VERSION = 6;
 
 export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
     const uploadStartDate = new Date();
