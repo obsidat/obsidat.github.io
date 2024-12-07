@@ -23,7 +23,6 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
         ([path, file]) => ({ path, ...file }),
     );
 
-    // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
     const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
@@ -63,7 +62,6 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
             continue;
         }
 
-        // TODO potentially check file paths for collisions
         const { vaultName, filePath, fileLastCreatedOrModified } = decodeCbor(
             await decryptInlineData(remoteFile.metadata, vaultMetadataFile.passphrase)
         ) as FileMetadata;

@@ -97,7 +97,6 @@ export function markdownRender(markdown: string, makeUrl: (path: string) => stri
                     parts[0] = parts[0].replace(/.(md|markdown)\s?$/i, "");
                     match.text = (parts[1] || parts[0]).trim();
                     
-                    // TODO replace /notes/ internal links
                     match.url = makeUrl(parts[0].trim());
                 }
             })

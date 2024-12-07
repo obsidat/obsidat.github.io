@@ -14,6 +14,7 @@ interface ListRecordsParams<K extends keyof Records> extends ComAtprotoRepoListR
 interface ListRecordsOutput<K extends keyof Records> extends ComAtprotoRepoListRecords.Output { records: ListRecordsRecord<K>[]; }
 interface ListRecordsRecord<K extends keyof Records> extends ComAtprotoRepoListRecords.Record { value: Records[K]; }
 
+// TODO use
 export class XRPCEx extends XRPC {
     async getRecord<K extends keyof Records>(params: GetRecordParams<K>) {
         const { data } = await this.get('com.atproto.repo.getRecord', {

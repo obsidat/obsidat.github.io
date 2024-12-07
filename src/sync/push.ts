@@ -20,7 +20,6 @@ export async function doPush(agent: XRPC, plugin: MyPlugin) {
 
     const vaultMetadata = await getVaultMetadata(agent, plugin);
 
-    // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
     const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);

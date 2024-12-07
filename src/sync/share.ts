@@ -12,7 +12,6 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
 
     const collection = 'io.github.obsidat.publicFile';
 
-    // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
     const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
