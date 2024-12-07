@@ -82,12 +82,12 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
             encryptBlob(fileData, perFilePassPhrase),
 
             // TODO potentially check file paths for collisions
-            encryptInlineData(encodeCbor({
+            encryptInlineData(new EncryptedMetadata({
                 filePath: file.path,
                 vaultName: file.vault.getName(),
                 referencedFilePassphrases,
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
-            } satisfies EncryptedMetadata), perFilePassPhrase),
+            }).toCbor(), perFilePassPhrase),
         ]);
 
         if (remoteFile && remoteVersion >= VERSION) {

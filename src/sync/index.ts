@@ -1,16 +1,24 @@
 import { type TFile } from "obsidian";
 import { toString } from 'uint8arrays/to-string'
 import { hashToBase32, scryptToBase32 } from "../utils";
+import { CborEntity, key } from "../utils/cbor";
 
 /**
  * Encrypted file metadata to be serialized as CBOR and encrypted with AGE to be included in the record as
  * an inline byte stream
  */
-export interface EncryptedMetadata {
-    vaultName: string;
-    filePath: string;
-    referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]>;
-    fileLastCreatedOrModified: Date;
+export class EncryptedMetadata extends CborEntity<EncryptedMetadata> {
+    @key(0)
+    vaultName: string = undefined!;
+    
+    @key(1)
+    filePath: string = undefined!;
+    
+    @key(2)
+    referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]> = undefined!;
+    
+    @key(3)
+    fileLastCreatedOrModified: Date = undefined!;
 }
 
 // TODO: maybe wanna make this per-repo? or is that unnecessary?

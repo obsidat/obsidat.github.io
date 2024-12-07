@@ -190,6 +190,7 @@ export function toGenericValue(value: unknown): Brand.Union<
     | IoGithubObsidatGeneric.Number
     | IoGithubObsidatGeneric.Object
     | IoGithubObsidatGeneric.String
+    | IoGithubObsidatGeneric.Array
 > | undefined {
     if (value === undefined) return undefined;
     if (value === null) return { $type: 'io.github.obsidat.generic#null' };
@@ -201,9 +202,15 @@ export function toGenericValue(value: unknown): Brand.Union<
         $type: 'io.github.obsidat.generic#string',
         value,
     };
+    if (Array.isArray(value)) return {
+        $type: 'io.github.obsidat.generic#array',
+        value: value.map(toGenericValue).map(e => ({
+            value: e
+        } satisfies IoGithubObsidatGeneric.Generic)),
+    };
     if (typeof value === 'object') return {
         $type: 'io.github.obsidat.generic#object',
-        value: JSON.stringify(value),
+        value: toKeyValuePairs(value as Record<string, unknown>),
     };
     throw new Error('Unsupported type: ' + typeof value);
 }

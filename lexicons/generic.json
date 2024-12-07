@@ -13,6 +13,7 @@
             "io.github.obsidat.generic#string",
             "io.github.obsidat.generic#number",
             "io.github.obsidat.generic#object",
+            "io.github.obsidat.generic#array",
             "io.github.obsidat.generic#null"
           ],
           "description": "The value. A value of `undefined` is represented by a property with a value missing or `undefined`."
@@ -37,6 +38,7 @@
             "io.github.obsidat.generic#string",
             "io.github.obsidat.generic#number",
             "io.github.obsidat.generic#object",
+            "io.github.obsidat.generic#array",
             "io.github.obsidat.generic#null"
           ],
           "description": "The value for this key-value mapping. A value of `undefined` is represented by a property with a value missing or `undefined`."
@@ -88,14 +90,35 @@
     },
     "object": {
       "type": "object",
-      "description": "A generic JSON object or array value, serialized as a string.",
+      "description": "A generic JSON object value, serialized as an array of key-value pairs.",
       "required": [
         "value"
       ],
       "properties": {
         "value": {
-          "type": "string",
-          "description": "The object or array, encoded in JSON format."
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "io.github.obsidat.generic#keyValuePair"
+          },
+          "description": "The key-value pairs that comprise this object."
+        }
+      }
+    },
+    "array": {
+      "type": "object",
+      "description": "A generic JSON array value, serialized as an array of key-value pairs.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "io.github.obsidat.generic#generic"
+          },
+          "description": "The values that comprise this array."
         }
       }
     },

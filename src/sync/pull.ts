@@ -7,6 +7,7 @@ import { EncryptedMetadata, getLocalFileRkey, getPerFilePassphrase } from ".";
 import { decryptBlob, decryptInlineData, downloadFileBlob } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
+import { fromCbor } from "../utils/cbor";
 
 export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
     const collection = 'io.github.obsidat.file';
@@ -45,9 +46,10 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
         const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
 
         // TODO potentially check file paths for collisions
-        const { vaultName, filePath, fileLastCreatedOrModified } = decodeCbor(
+        const { vaultName, filePath, fileLastCreatedOrModified } = fromCbor(
+            EncryptedMetadata,
             await decryptInlineData(remoteFile.metadata, perFilePassPhrase)
-        ) as EncryptedMetadata;
+        );
 
         if (localFile) {
             if (settings.dontOverwriteNewFiles &&

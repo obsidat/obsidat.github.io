@@ -22,11 +22,18 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
     }
 
     namespace IoGithubObsidatGeneric {
+        /** A generic JSON array value, serialized as an array of key-value pairs. */
+        interface Array {
+            [Brand.Type]?: "io.github.obsidat.generic#array";
+            /** The values that comprise this array. */
+            value: IoGithubObsidatGeneric.Generic[];
+        }
         /** Represents a union of generic JSON-compatible types. */
         interface Generic {
             [Brand.Type]?: "io.github.obsidat.generic#generic";
             /** The value. A value of `undefined` is represented by a property with a value missing or `undefined`. */
             value?: Brand.Union<
+                | IoGithubObsidatGeneric.Array
                 | IoGithubObsidatGeneric.Null
                 | IoGithubObsidatGeneric.Number
                 | IoGithubObsidatGeneric.Object
@@ -40,6 +47,7 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
             key: string;
             /** The value for this key-value mapping. A value of `undefined` is represented by a property with a value missing or `undefined`. */
             value?: Brand.Union<
+                | IoGithubObsidatGeneric.Array
                 | IoGithubObsidatGeneric.Null
                 | IoGithubObsidatGeneric.Number
                 | IoGithubObsidatGeneric.Object
@@ -56,11 +64,11 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
             /** The number, encoded in JSON number format. */
             value: string;
         }
-        /** A generic JSON object or array value, serialized as a string. */
+        /** A generic JSON object value, serialized as an array of key-value pairs. */
         interface Object {
             [Brand.Type]?: "io.github.obsidat.generic#object";
-            /** The object or array, encoded in JSON format. */
-            value: string;
+            /** The key-value pairs that comprise this object. */
+            value: IoGithubObsidatGeneric.KeyValuePair[];
         }
         /** A generic string value, boxed for unions. */
         interface String {

@@ -28,7 +28,8 @@
     },
     "allowArbitraryExtensions": false,
     "jsx": "react",
-    "jsxFactory": "h"
+    "jsxFactory": "h",
+    "experimentalDecorators": true
   },
   "include": [ "./src/**/*.ts", "./src/**/*.tsx", "./utils/**/*.ts", "./utils/**/*.mts" ],
   "exclude": ["node_modules", "spa", "/main.js"],
