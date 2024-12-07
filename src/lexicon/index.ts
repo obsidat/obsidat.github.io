@@ -55,9 +55,7 @@ export declare namespace At {
     }
 }
 export declare namespace IoGithubObsidatFile {
-    /** An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase stored in the settings of the atproto-obsidian-sync Obsidian plugin.
-Before encrypting, the passphrase is concatenated as `passphrase || rkey` to make it unique per-file.
-Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' || passphrase || ':' || salt` The salt is currently hardcoded in the plugin but this may change in the future. */
+    /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base32) but unique per-file per-vault. */
     interface Record {
         $type: "io.github.obsidat.file";
         /** The AGE encrypted file contents. */
@@ -183,10 +181,10 @@ export declare namespace IoGithubObsidatPublicFile {
 }
 
 export declare namespace IoGithubObsidatVault {
-    /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
+    /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base32. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
     interface Record {
         $type: "io.github.obsidat.vault";
-        /** AGE encrypted vault metadata. TODO document */
+        /** The AGE encrypted CBOR record containing vault metadata following the VaultMetadata interface specification in `src\sync\index.ts` */
         metadata: At.Bytes;
         /** The vault's name. */
         name: string;

@@ -5,7 +5,7 @@
     "main": {
       "type": "record",
       "key": "any",
-      "description": "An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }",
+      "description": "An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base32. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }",
       "record": {
         "type": "object",
         "required": [
@@ -21,7 +21,7 @@
           },
           "metadata": {
             "type": "bytes",
-            "description": "AGE encrypted vault metadata. TODO document"
+            "description": "The AGE encrypted CBOR record containing vault metadata following the VaultMetadata interface specification in `src\\sync\\index.ts`"
           },
           "vaultCreatedAt": {
             "type": "string",

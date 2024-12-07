@@ -12,9 +12,9 @@ export interface VaultMetadata {
 }
 
 export interface VaultMetadataFile {
-    /** Crockford base32 encoded, cryptographically secure random string (16 bytes) */
+    /** Base32 encoded, cryptographically secure random string (16 bytes) */
     rkey: string;
-    /** Crockford base32 encoded, cryptographically secure random string (32 bytes) */
+    /** Base32 encoded, cryptographically secure random string (32 bytes) */
     passphrase: string;
 }
 
