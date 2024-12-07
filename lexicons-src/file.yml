@@ -5,13 +5,8 @@ defs:
     type: record
     key: any
     description: >-
-      An Obsidian file. Its file path, vault name, and contents are encrypted using a passphrase
-      stored in the settings of the atproto-obsidian-sync Obsidian plugin.
-
-      Before encrypting, the passphrase is concatenated as `passphrase || rkey` to make it unique per-file.
-
-      Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' || passphrase || ':' || salt`
-      The salt is currently hardcoded in the plugin but this may change in the future.
+      An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated
+      passphrase. The rkey is also randomly generated but unique per-file per-vault.
     record:
       type: object
       required:

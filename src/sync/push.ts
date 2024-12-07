@@ -9,7 +9,7 @@ import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { getVaultMetadata } from "./vault-metadata";
 
-const VERSION = 6;
+const VERSION = 7;
 
 export async function doPush(agent: XRPC, plugin: MyPlugin) {
     const { app, settings } = plugin;

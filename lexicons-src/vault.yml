@@ -21,7 +21,9 @@ defs:
           description: The vault's name.
         metadata:
           type: bytes
-          description: AGE encrypted vault metadata. TODO document
+          description: >-
+            The AGE encrypted CBOR record containing file metadata following the FileMetadata interface
+            specification in `src\sync\index.ts`
         vaultCreatedAt:
           type: string
           format: datetime
