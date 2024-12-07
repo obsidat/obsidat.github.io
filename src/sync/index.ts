@@ -6,22 +6,12 @@ import { CborEntity, key } from "../utils/cbor";
 /**
  * Encrypted file metadata to be serialized as CBOR and encrypted with AGE to be included in the record as
  * an inline byte stream.
- * 
- * The class is serialized as an array where the @key decorator determines the element index for each
- * property.
  */
-export class EncryptedMetadata extends CborEntity<EncryptedMetadata> {
-    @key(0)
-    vaultName: string = undefined!;
-    
-    @key(1)
-    filePath: string = undefined!;
-    
-    @key(2)
-    referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]> = undefined!;
-    
-    @key(3)
-    fileLastCreatedOrModified: Date = undefined!;
+export interface EncryptedMetadata {
+    vaultName: string;
+    filePath: string;
+    referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]>;
+    fileLastCreatedOrModified: Date;
 }
 
 // TODO: maybe wanna make this per-repo? or is that unnecessary?
