@@ -22,7 +22,7 @@ defs:
         metadata:
           type: bytes
           description: >-
-            The AGE encrypted CBOR record containing file metadata following the FileMetadata interface
+            The AGE encrypted CBOR record containing vault metadata following the VaultMetadata interface
             specification in `src\sync\index.ts`
         vaultCreatedAt:
           type: string
