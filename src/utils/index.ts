@@ -9,7 +9,7 @@ import { DidDocument } from "@atcute/client/utils/did";
 import base32Encode from 'base32-encode';
 import base32Decode from 'base32-decode';
 import { fromString, toString } from 'uint8arrays';
-import { scrypt } from "@noble/hashes/scrypt";
+import { scrypt, scryptAsync } from "@noble/hashes/scrypt";
 
 /*!
 The MIT License (MIT)
@@ -148,6 +148,12 @@ export function scryptToBase32(password: string | Uint8Array, salt: string | Uin
     // OWASP says to use scrypt instead of argon2id if argon2id isn't available, and noble hashes argon2id is
     // 5x slower than native code
     return toBase32(scrypt(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
+}
+
+export async function scryptToBase32Async(password: string | Uint8Array, salt: string | Uint8Array) {
+    // OWASP says to use scrypt instead of argon2id if argon2id isn't available, and noble hashes argon2id is
+    // 5x slower than native code
+    return toBase32(await scryptAsync(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
 }
 
 export function hashToBase32(password: string | Uint8Array, salt: string | Uint8Array) {

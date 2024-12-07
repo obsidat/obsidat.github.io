@@ -2,18 +2,23 @@ import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
 import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
-import { MyPluginSettings } from "..";
-import { EncryptedMetadata, getLocalFileRkey, getPerFilePassphrase } from ".";
+import MyPlugin, { MyPluginSettings } from "..";
+import { FileMetadata } from ".";
 import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
+import { getVaultMetadata } from "./vault-metadata";
 
 const VERSION = 6;
 
-export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) {
+export async function doPush(agent: XRPC, plugin: MyPlugin) {
+    const { app, settings } = plugin;
+
     const uploadStartDate = new Date();
 
     const collection = 'io.github.obsidat.file';
+
+    const vaultMetadata = await getVaultMetadata(agent, plugin);
 
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
@@ -29,7 +34,7 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
-        file => getLocalFileRkey(file, settings.passphrase),
+        file => vaultMetadata.files[file.path].rkey,
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
@@ -70,24 +75,22 @@ export async function doPush(agent: XRPC, app: App, settings: MyPluginSettings) 
         const referencedFilePassphrases = app.metadataCache.resolvedLinks[file.path] ? Object.fromEntries(
             Object.entries(app.metadataCache.resolvedLinks[file.path])
                 .map(([k]) => [k, [
-                    getLocalFileRkey({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
-                    getPerFilePassphrase({ path: k, vaultName: file.vault.getName(), }, settings.passphrase),
+                    vaultMetadata.files[k].rkey,
+                    vaultMetadata.files[k].passphrase,
                 ]])
-        ) satisfies EncryptedMetadata['referencedFilePassphrases'] : undefined;
+        ) satisfies FileMetadata['referencedFilePassphrases'] : undefined;
 
-        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
+        const perFilePassphrase = vaultMetadata.files[file.path].passphrase;
 
         const [encryptedFileData, encryptedFileMeta] = await Promise.all([
-            // TODO encode passphrase in file properties (how would we do this for binary files?)
-            encryptBlob(fileData, perFilePassPhrase),
+            encryptBlob(fileData, settings.passphrase, perFilePassphrase),
 
-            // TODO potentially check file paths for collisions
-            encryptInlineData(new EncryptedMetadata({
+            encryptInlineData(encodeCbor({
                 filePath: file.path,
                 vaultName: file.vault.getName(),
                 referencedFilePassphrases,
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
-            }).toCbor(), perFilePassPhrase),
+            } satisfies FileMetadata), settings.passphrase, perFilePassphrase),
         ]);
 
         if (remoteFile && remoteVersion >= VERSION) {

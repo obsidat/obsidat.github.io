@@ -12,7 +12,7 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
             $type: "io.github.obsidat.file";
             /** The AGE encrypted file contents. */
             body: At.Blob;
-            /** The AGE encrypted CBOR record containing file metadata following the EncryptedMetadata interface specification in `src\sync\index.ts` */
+            /** The AGE encrypted CBOR record containing file metadata following the FileMetadata interface specification in `src\sync\index.ts` */
             metadata: At.Bytes;
             /** This record's creation date. */
             recordCreatedAt: string;
@@ -133,9 +133,11 @@ Record Key is blake3 hash of `lower(filePath) || ':' || lower(vaultName) || ':' 
     }
 
     namespace IoGithubObsidatVault {
-        /** An Obsidian vault. */
+        /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
         interface Record {
             $type: "io.github.obsidat.vault";
+            /** AGE encrypted vault metadata. TODO document */
+            metadata: At.Bytes;
             /** The vault's name. */
             name: string;
             /** This record's creation date. */

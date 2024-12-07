@@ -32,16 +32,12 @@ export async function identityToRecipient(identity: string | CryptoKey): Promise
 }
 
 export class Encrypter {
-  private passphrase: string | null = null
+  private passphrases: string[] = []
   private scryptWorkFactor = 18
   private recipients: Uint8Array[] = []
 
-  setPassphrase(s: string): void {
-    if (this.passphrase !== null)
-      throw new Error("can encrypt to at most one passphrase")
-    if (this.recipients.length !== 0)
-      throw new Error("can't encrypt to both recipients and passphrases")
-    this.passphrase = s
+  addPassphrase(s: string): void {
+    this.passphrases.push(s)
   }
 
   setScryptWorkFactor(logN: number): void {
@@ -49,8 +45,6 @@ export class Encrypter {
   }
 
   addRecipient(s: string): void {
-    if (this.passphrase !== null)
-      throw new Error("can't encrypt to both recipients and passphrases")
     const res = bech32.decodeToBytes(s)
     if (!s.startsWith("age1") ||
       res.prefix.toLowerCase() !== "age" ||
@@ -79,8 +73,8 @@ export class Encrypter {
     for (const recipient of this.recipients) {
       stanzas.push(await x25519Wrap(fileKey, recipient))
     }
-    if (this.passphrase !== null) {
-      stanzas.push(scryptWrap(fileKey, this.passphrase, this.scryptWorkFactor))
+    for (const passphrase of this.passphrases) {
+      stanzas.push(scryptWrap(fileKey, passphrase, this.scryptWorkFactor))
     }
 
     const hmacKey = hkdf(sha256, fileKey, undefined, "header", 32)

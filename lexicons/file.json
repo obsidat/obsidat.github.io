@@ -24,7 +24,7 @@
           },
           "metadata": {
             "type": "bytes",
-            "description": "The AGE encrypted CBOR record containing file metadata following the EncryptedMetadata interface specification in `src\\sync\\index.ts`"
+            "description": "The AGE encrypted CBOR record containing file metadata following the FileMetadata interface specification in `src\\sync\\index.ts`"
           },
           "recordCreatedAt": {
             "type": "string",

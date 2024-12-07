@@ -29,7 +29,7 @@ class CborSettings {
 export interface CborProperty {
     propertyName: string;
     key: number;
-    deserializer?: typeof CborEntity;
+    valueConverter?: typeof CborEntity;
 }
 
 const configs = new DefaultWeakMap<NewableFunction, CborSettings>(() => new CborSettings());
@@ -82,8 +82,8 @@ function unpack(self: CborEntity<any>, input: ArrayLike<unknown>) {
         if (x === undefined) continue;
 
         let value = input[x.key];
-        if (x.deserializer) {
-            value = new x.deserializer(value as Array<unknown>);
+        if (x.valueConverter) {
+            value = new x.valueConverter(value as Array<unknown>);
         }
         (self as unknown as Record<string, unknown>)[x.propertyName] = value;
     }

@@ -4,7 +4,7 @@ import { getActorInfo } from '@parent/api-utils';
 import { decryptBlob, downloadFileBlob, decryptInlineData } from '@parent/utils/crypto-utils';
 import { detectMimeType } from '@parent/utils';
 import { decode as decodeCbor } from 'cbor-x';
-import { EncryptedMetadata } from '@parent/sync';
+import type { FileMetadata } from '@parent/sync';
 import { fromCbor } from '@parent/utils/cbor';
 
 export class ApiClient {
@@ -42,10 +42,9 @@ export class ApiClient {
         if (passphrase !== undefined) {
             const { uri, value: file } = await this.getFile(rkey, passphrase);
     
-            const { vaultName, filePath, referencedFilePassphrases, fileLastCreatedOrModified } = fromCbor(
-                EncryptedMetadata,
+            const { vaultName, filePath, referencedFilePassphrases, fileLastCreatedOrModified } = decodeCbor(
                 await decryptInlineData(file.metadata, passphrase)
-            );
+            ) as FileMetadata;
             const encryptedContents = await downloadFileBlob(this.did, this.pdsAgent, file);
             const contents = await decryptBlob(encryptedContents, passphrase);
     

@@ -4,17 +4,24 @@ defs:
   main:
     type: record
     key: any
-    description: An Obsidian vault.
+    description: >-
+      An Obsidian vault.
+      The key is the scrypt hash of the passphrase + vault name as salt.
+      Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }
     record:
       type: object
       required:
         - name
         - vaultCreatedAt
         - recordCreatedAt
+        - metadata
       properties:
         name:
           type: string
           description: The vault's name.
+        metadata:
+          type: bytes
+          description: AGE encrypted vault metadata. TODO document
         vaultCreatedAt:
           type: string
           format: datetime

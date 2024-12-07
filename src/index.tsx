@@ -10,7 +10,7 @@ import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
 import { ATMOSPHERE_CLIENT, Awaitable } from "./utils/index.ts";
 import { doPush } from "./sync/push.ts";
-import { getLocalFileRkey, getPerFilePassphrase } from "./sync/index.ts";
+import { VaultMetadata } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
 import { doShare } from './sync/share.ts';
 
@@ -25,7 +25,8 @@ export interface MyPluginSettings {
     auth: {
         state: Record<string, NodeSavedState>;
         session: Record<string, NodeSavedSession>;
-    }
+    },
+    vaultMetadataCache: VaultMetadata,
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -36,6 +37,9 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     auth: {
         state: {},
         session: {},
+    },
+    vaultMetadataCache: {
+        files: {}
     },
 }
 
@@ -84,11 +88,11 @@ export default class MyPlugin extends Plugin {
 
         // This creates an icon in the left ribbon.
         this.addRibbonIcon('arrow-up-from-line', 'Push changes to AT Protocol', async (evt: MouseEvent) => {
-            doPush(await this.agent, this.app, this.settings);
+            doPush(await this.agent, this);
         });
 
         this.addRibbonIcon('arrow-down-from-line', 'Pull changes from AT Protocol', async (evt: MouseEvent) => {
-            doPull(await this.agent, this.app, this.settings, await this.did);
+            doPull(await this.agent, await this.did, this);
         });
         
         this.addCommand({
@@ -114,9 +118,9 @@ export default class MyPlugin extends Plugin {
                     `${ATMOSPHERE_CLIENT}/private-page/${
                         this.settings.bskyHandle!
                     }/${
-                        getLocalFileRkey(activeFile, this.settings.passphrase)
+                        this.settings.vaultMetadataCache.files[activeFile.path].rkey
                     }/${
-                        getPerFilePassphrase(activeFile, this.settings.passphrase)
+                        this.settings.vaultMetadataCache.files[activeFile.path].passphrase
                     }`,
                     '_blank',
                     'noopener,noreferrer',

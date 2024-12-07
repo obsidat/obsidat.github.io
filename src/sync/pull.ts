@@ -2,15 +2,20 @@ import { App, Notice, TFile } from "obsidian";
 import { hashToBase32, paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
-import { MyPluginSettings } from "..";
-import { EncryptedMetadata, getLocalFileRkey, getPerFilePassphrase } from ".";
+import MyPlugin, { MyPluginSettings } from "..";
+import { FileMetadata } from ".";
 import { decryptBlob, decryptInlineData, downloadFileBlob } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { fromCbor } from "../utils/cbor";
+import { getVaultMetadata } from "./vault-metadata";
 
-export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, did: At.DID) {
+export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
+    const { app, settings } = plugin;
+
     const collection = 'io.github.obsidat.file';
+
+    const vaultMetadata = await getVaultMetadata(agent, plugin);
 
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
@@ -23,7 +28,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
 
-        file => getLocalFileRkey(file, settings.passphrase),
+        file => vaultMetadata.files[file.path].rkey,
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
@@ -43,13 +48,10 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
     for (const [rkey, remoteFile] of remoteFilesByRkey.entries()) {
         const localFile = localFilesByRkey.get(rkey)!;
 
-        const perFilePassPhrase = getPerFilePassphrase(rkey, settings.passphrase);
-
         // TODO potentially check file paths for collisions
-        const { vaultName, filePath, fileLastCreatedOrModified } = fromCbor(
-            EncryptedMetadata,
-            await decryptInlineData(remoteFile.metadata, perFilePassPhrase)
-        );
+        const { vaultName, filePath, fileLastCreatedOrModified } = decodeCbor(
+            await decryptInlineData(remoteFile.metadata, settings.passphrase)
+        ) as FileMetadata;
 
         if (localFile) {
             if (settings.dontOverwriteNewFiles &&
@@ -73,7 +75,7 @@ export async function doPull(agent: XRPC, app: App, settings: MyPluginSettings, 
 
         const fileData = await decryptBlob(
             encryptedFileData,
-            perFilePassPhrase
+            settings.passphrase
         );
 
         if (localFile) {
