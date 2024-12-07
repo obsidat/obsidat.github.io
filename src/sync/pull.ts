@@ -17,6 +17,12 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
 
     const vaultMetadata = await getVaultMetadata(agent, plugin);
 
+    const vaultMetadataFilesByRkey = CaseInsensitiveMap.toMap(
+        Object.entries(vaultMetadata.files),
+        ([path, file]) => file.rkey,
+        ([path, file]) => ({ path, ...file }),
+    );
+
     // TODO: any way to only get rkeys?
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
@@ -48,9 +54,18 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
     for (const [rkey, remoteFile] of remoteFilesByRkey.entries()) {
         const localFile = localFilesByRkey.get(rkey)!;
 
+        const vaultMetadataFile = vaultMetadataFilesByRkey.get(rkey);
+        if (!vaultMetadataFile) {
+            console.warn(
+                'race condition! another device is uploading while we are downloading,' +
+                `and the vault record is not up to date. file rkey ${rkey} remoteFile`, remoteFile
+            );
+            continue;
+        }
+
         // TODO potentially check file paths for collisions
         const { vaultName, filePath, fileLastCreatedOrModified } = decodeCbor(
-            await decryptInlineData(remoteFile.metadata, settings.passphrase)
+            await decryptInlineData(remoteFile.metadata, vaultMetadataFile.passphrase)
         ) as FileMetadata;
 
         if (localFile) {
@@ -66,7 +81,6 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
             continue;
         }
 
-        // TODO encode passphrase in file properties (how would we do this for binary files?)
         const encryptedFileData = await downloadFileBlob(
             did,
             agent,

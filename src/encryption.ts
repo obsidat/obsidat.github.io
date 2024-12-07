@@ -6,21 +6,18 @@ export function generatePassphrase(bits = 256) {
     return toBase32(randomBytes(Math.max(1, (bits / 8) | 0)));
 }
 
-export async function encryptData(data: Uint8Array, ...passphrases: string[]) {
-    if (passphrases.length === 0)
-        throw new Error('must specify at least one passphrase');
+export async function encryptData(data: Uint8Array, passphrase?: string) {
+    passphrase ??= generatePassphrase();
 
     const e = new Encrypter();
-    for (const passphrase of passphrases)
-        e.addPassphrase(passphrase);
+    e.setPassphrase(passphrase);
     return await e.encrypt(data);
 }
 
-export async function decryptData(ciphertext: ArrayBufferLike, ...passphrases: string[]) {
-    const d = new Decrypter();
-    for (const passphrase of passphrases)
-        d.addPassphrase(passphrase);
-    const plaintext = await d.decrypt(new Uint8Array(ciphertext));
+export async function decryptData(ciphertext: ArrayBufferLike, passphrase: string) {
+    const e = new Decrypter();
+    e.addPassphrase(passphrase);
+    const plaintext = await e.decrypt(new Uint8Array(ciphertext));
     
     return plaintext;
 }

@@ -83,14 +83,14 @@ export async function doPush(agent: XRPC, plugin: MyPlugin) {
         const perFilePassphrase = vaultMetadata.files[file.path].passphrase;
 
         const [encryptedFileData, encryptedFileMeta] = await Promise.all([
-            encryptBlob(fileData, settings.passphrase, perFilePassphrase),
+            encryptBlob(fileData, perFilePassphrase),
 
             encryptInlineData(encodeCbor({
                 filePath: file.path,
                 vaultName: file.vault.getName(),
                 referencedFilePassphrases,
                 fileLastCreatedOrModified: new Date(file.fileLastCreatedOrModified),
-            } satisfies FileMetadata), settings.passphrase, perFilePassphrase),
+            } satisfies FileMetadata), perFilePassphrase),
         ]);
 
         if (remoteFile && remoteVersion >= VERSION) {
