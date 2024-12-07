@@ -136,11 +136,11 @@ export function isEqualBytes(bytes1: Uint8Array, bytes2: Uint8Array): boolean {
 }
 
 export function toBase32(buffer: ArrayBufferLike) {
-    return base32Encode(buffer, 'Crockford').toLowerCase();
+    return base32Encode(buffer, 'RFC4648').toLowerCase();
 }
 
 export function fromBase32(string: string) {
-    return base32Decode(string, 'Crockford');
+    return base32Decode(string, 'RFC4648');
 }
 
 const logN = 18; // same as typage default
