@@ -264,7 +264,7 @@ export function toMap<K, V, T>(entries: T[], getKey: (entry: T) => K, getValue?:
 
 export function memoize<This extends { constructor: NewableFunction }, PropertyName extends string>() {
     return function (target: This, propertyName: PropertyName, descriptor: TypedPropertyDescriptor<any>): void {
-        const cachedMap = new WeakMap<any, any>();
+        const cachedMap = new WeakMap<object, unknown>();
 
         Object.defineProperty(target, propertyName, {
             get() {
