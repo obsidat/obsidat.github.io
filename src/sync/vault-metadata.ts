@@ -95,6 +95,11 @@ async function tryFindOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
         vaultRkey = existingVault.rkey;
     }
 
+    // no need to update, we already have a vault listed
+    if (settings.vaultRkey === vaultRkey && existingVault) {
+        return vaultRkey;
+    }
+
     if (await agent.trySwapRecord({
         repo: settings.bskyHandle!,
         collection: 'io.github.obsidat.vaults',
