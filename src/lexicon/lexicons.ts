@@ -5,7 +5,9 @@ import "@atcute/client/lexicons";
 
 declare module "@atcute/client/lexicons" {
     namespace IoGithubObsidatFile {
-        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is `vault_tid || file_tid` (always 26 characters)  */
+        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase.
+The rkey is `vault_tid || file_tid` (16 bytes, base32-sortable, always 26 characters) but this could change later.
+The file TID is not accurate to record or file creation date. */
         interface Record {
             $type: "io.github.obsidat.file";
             /** The AGE encrypted file contents. */
@@ -14,7 +16,7 @@ declare module "@atcute/client/lexicons" {
             metadata: At.Bytes;
             /** This record's creation date. */
             recordCreatedAt: string;
-            /** A newer version file always overrides an older version file. `undefined` is the lowest version. */
+            /** A newer version file always overrides an older version file. `undefined` is the oldest version. */
             version?: number;
         }
     }
