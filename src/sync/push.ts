@@ -34,7 +34,7 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
 
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
-        file => vaultMetadata.files[file.path].rkey,
+        file => vaultMetadata.rkey + vaultMetadata.files[file.path].rkey,
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
