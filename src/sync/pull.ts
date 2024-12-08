@@ -1,5 +1,5 @@
 import { App, Notice, TFile } from "obsidian";
-import { hashToBase32, paginatedListRecords } from "../utils";
+import { paginatedListRecords } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import MyPlugin, { MyPluginSettings } from "..";

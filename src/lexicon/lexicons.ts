@@ -5,7 +5,7 @@ import "@atcute/client/lexicons";
 
 declare module "@atcute/client/lexicons" {
     namespace IoGithubObsidatFile {
-        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base32) but unique per-file per-vault. */
+        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base58) but unique per-file per-vault. */
         interface Record {
             $type: "io.github.obsidat.file";
             /** The AGE encrypted file contents. */
@@ -131,7 +131,7 @@ declare module "@atcute/client/lexicons" {
     }
 
     namespace IoGithubObsidatVault {
-        /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base32. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
+        /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base58. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
         interface Record {
             $type: "io.github.obsidat.vault";
             /** The AGE encrypted CBOR record containing vault metadata following the VaultMetadata interface specification in `src\sync\index.ts` */

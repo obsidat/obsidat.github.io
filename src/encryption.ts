@@ -1,9 +1,9 @@
 import { Encrypter, Decrypter } from './typage/index.ts';
 import { randomBytes } from '@noble/hashes/utils';
-import { toBase32 } from './utils/index.ts';
+import { toBase58 } from './utils/index.ts';
 
 export function generatePassphrase(bits = 256) {
-    return toBase32(randomBytes(Math.max(1, (bits / 8) | 0)));
+    return toBase58(randomBytes(Math.max(1, (bits / 8) | 0)));
 }
 
 export async function encryptData(data: Uint8Array, passphrase?: string) {

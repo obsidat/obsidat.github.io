@@ -1,7 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
-import { paginatedListRecords, isCidMatching, chunks, hashToBase32 } from "../utils";
+import { paginatedListRecords, isCidMatching, chunks } from "../utils";
 import MyPlugin, { MyPluginSettings } from "..";
 import { FileMetadata } from ".";
 import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";

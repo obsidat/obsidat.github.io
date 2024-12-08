@@ -6,7 +6,7 @@ import { IoGithubObsidatVault } from "@atcute/client/lexicons";
 import { decryptInlineData, encryptInlineData } from "../utils/crypto-utils";
 import { decode as decodeCbor, encode as encodeCbor } from "cbor-x";
 import { randomBytes } from "@noble/hashes/utils";
-import { toBase32 } from "../utils";
+import { toBase58 } from "../utils";
 
 async function tryGetVaultMetadata(agent: XRPC, plugin: MyPlugin, vaultRkey: string) {
     const { app, settings } = plugin;
@@ -45,8 +45,8 @@ async function tryGetVaultMetadata(agent: XRPC, plugin: MyPlugin, vaultRkey: str
         if (file.path in settings.vaultMetadataCache) continue; // TODO incrementally update the metadata instead
 
         settings.vaultMetadataCache.files[file.path] = {
-            passphrase: toBase32(randomBytes(32)),
-            rkey: toBase32(randomBytes(16)),
+            passphrase: toBase58(randomBytes(32)),
+            rkey: toBase58(randomBytes(16)),
         };
     }
 

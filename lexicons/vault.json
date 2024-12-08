@@ -5,7 +5,7 @@
     "main": {
       "type": "record",
       "key": "any",
-      "description": "An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base32. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }",
+      "description": "An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base58. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }",
       "record": {
         "type": "object",
         "required": [

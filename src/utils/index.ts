@@ -6,8 +6,7 @@ import { sha256 } from '@noble/hashes/sha256';
 import { parse as parseCid, create as createCid, format as formatCid } from '@atcute/cid';
 import { blake3 } from "@noble/hashes/blake3";
 import { DidDocument } from "@atcute/client/utils/did";
-import base32Encode from 'base32-encode';
-import base32Decode from 'base32-decode';
+import { toString as ui8ToString, fromString as ui8FromString } from 'uint8arrays';
 import { fromString, toString } from 'uint8arrays';
 import { scrypt, scryptAsync } from "@noble/hashes/scrypt";
 
@@ -136,24 +135,32 @@ export function isEqualBytes(bytes1: Uint8Array, bytes2: Uint8Array): boolean {
 }
 
 export function toBase32(buffer: ArrayBufferLike) {
-    return base32Encode(buffer, 'RFC4648').toLowerCase();
+    return ui8ToString(new Uint8Array(buffer), 'base64').toLowerCase();
 }
 
 export function fromBase32(string: string) {
-    return base32Decode(string, 'RFC4648');
+    return ui8FromString(string, 'base64');
+}
+
+export function toBase58(buffer: ArrayBufferLike) {
+    return ui8ToString(new Uint8Array(buffer), 'base58btc').toLowerCase();
+}
+
+export function fromBase58(string: string) {
+    return ui8FromString(string, 'base58btc');
 }
 
 const logN = 18; // same as typage default
-export function scryptToBase32(password: string | Uint8Array, salt: string | Uint8Array) {
+export function scryptToBase58(password: string | Uint8Array, salt: string | Uint8Array) {
     // OWASP says to use scrypt instead of argon2id if argon2id isn't available, and noble hashes argon2id is
     // 5x slower than native code
-    return toBase32(scrypt(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
+    return toBase58(scrypt(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
 }
 
-export async function scryptToBase32Async(password: string | Uint8Array, salt: string | Uint8Array) {
+export async function scryptToBase58Async(password: string | Uint8Array, salt: string | Uint8Array) {
     // OWASP says to use scrypt instead of argon2id if argon2id isn't available, and noble hashes argon2id is
     // 5x slower than native code
-    return toBase32(await scryptAsync(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
+    return toBase58(await scryptAsync(password, salt, { N: 2 ** logN, r: 8, p: 1, dkLen: 32 }));
 }
 
 export function hashToBase32(password: string | Uint8Array, salt: string | Uint8Array) {

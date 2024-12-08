@@ -5,7 +5,7 @@
     "main": {
       "type": "record",
       "key": "any",
-      "description": "An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base32) but unique per-file per-vault.",
+      "description": "An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base58) but unique per-file per-vault.",
       "record": {
         "type": "object",
         "required": [

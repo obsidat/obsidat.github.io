@@ -1,7 +1,5 @@
 import { type TFile } from "obsidian";
-import { toString } from 'uint8arrays/to-string'
-import { hashToBase32, scryptToBase32, scryptToBase32Async } from "../utils";
-import { CborEntity, key } from "../utils/cbor";
+import { scryptToBase58Async } from "../utils";
 
 /**
  * Metadata to be serialized as CBOR and stored in AGE encrypted form in the vault record.
@@ -12,9 +10,9 @@ export interface VaultMetadata {
 }
 
 export interface VaultMetadataFile {
-    /** Base32 encoded, cryptographically secure random string (16 bytes) */
+    /** Base58 encoded, cryptographically secure random string (16 bytes) */
     rkey: string;
-    /** Base32 encoded, cryptographically secure random string (32 bytes) */
+    /** Base58 encoded, cryptographically secure random string (32 bytes) */
     passphrase: string;
 }
 
@@ -35,5 +33,5 @@ export function getPublicFileRkey(file: TFile | { path: string, vaultName: strin
 }
 
 export async function getVaultRkey(vaultName: string, passphrase: string) {
-    return await scryptToBase32Async(passphrase, vaultName);
+    return await scryptToBase58Async(passphrase, vaultName);
 }
