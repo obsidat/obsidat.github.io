@@ -1,5 +1,5 @@
 import { XRPC, XRPCError, XRPCResponse } from "@atcute/client";
-import { ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, Records } from "@atcute/client/lexicons";
+import { At, ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, ComAtprotoSyncListBlobs, Records } from "@atcute/client/lexicons";
 
 interface GetRecordParams<K extends keyof Records> extends ComAtprotoRepoGetRecord.Params { collection: K; }
 interface GetRecordOutput<K extends keyof Records> extends ComAtprotoRepoGetRecord.Output { value: Records[K]; }
@@ -128,5 +128,52 @@ export class XRPCEx extends XRPC {
         } while (cursor);
     
         return { records: results, cursor };
+    }
+
+    async paginatedListBlobs(params: {
+        did: At.DID,
+        limit?: number;
+    }) {
+        const PER_PAGE = 100;
+    
+        const cids: string[] = [];
+
+        let limit = params.limit;
+    
+        let cursor: string | undefined = undefined;
+        do {
+            const result: XRPCResponse<ComAtprotoSyncListBlobs.Output>
+                = await this.get('com.atproto.sync.listBlobs', {
+                    params: {
+                        did: params.did,
+                        limit: limit === undefined
+                            ? PER_PAGE
+                            : limit / PER_PAGE > 1
+                                ? PER_PAGE
+                                : limit,
+                        cursor
+                    }
+                });
+    
+            if (!result.data.cids.length ||
+                result.data.cids.every(
+                    e => cids.find(e1 => e1 == e)
+                )
+            ) {
+                break;
+            }
+
+            if (limit !== undefined) {
+                limit -= result.data.cids.length;
+            }
+    
+            cids.push(...result.data.cids);
+    
+            cursor = result.data.cursor;
+    
+            if (!cursor) break;
+        } while (cursor);
+    
+        return { cids, cursor };
     }
 }
