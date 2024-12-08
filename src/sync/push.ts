@@ -45,6 +45,7 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
 
     new Notice(`Synchronizing ${localFilesByRkey.size} files to remote repo @${settings.bskyHandle}...`);
 
+    // TODO actually track file deletions instead of doing this?
     if (settings.deleteMissingRemoteFiles) {
         for (const [rkey, file] of remoteFilesByRkey.entries()) {
             if (!localFilesByRkey.has(rkey)) {
