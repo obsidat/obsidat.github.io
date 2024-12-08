@@ -57,9 +57,11 @@ export class ObsidianAtpOauthClientXPlat implements ObsidianAtpOauthClient {
             // now you can start making requests!
             const agent = new OAuthUserAgent(existingSession);
 
+            console.log('Refreshed session:', await agent.getSession())
+
             return agent;
         } catch (err) {
-            console.error(err);
+            console.error('Could not refresh session:', err);
         }
 
         // passing `identity` is optional,
