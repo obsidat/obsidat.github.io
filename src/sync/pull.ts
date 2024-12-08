@@ -43,13 +43,14 @@ export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
 
     new Notice(`Pulling changes from remote repo @${settings.bskyHandle}...`);
 
-    if (settings.deleteMissingLocalFiles) {
-        for (const [rkey, file] of localFilesByRkey.entries()) {
-            if (!remoteFilesByRkey.has(rkey)) {
-                await app.fileManager.trashFile(file);
-            }
-        }
-    }
+    // TODO actually track file deletions instead of doing this?
+    // if (settings.deleteMissingLocalFiles) {
+    //     for (const [rkey, file] of localFilesByRkey.entries()) {
+    //         if (!remoteFilesByRkey.has(rkey)) {
+    //             await app.fileManager.trashFile(file);
+    //         }
+    //     }
+    // }
 
     for (const [rkey, remoteFile] of remoteFilesByRkey.entries()) {
         const localFile = localFilesByRkey.get(rkey)!;
