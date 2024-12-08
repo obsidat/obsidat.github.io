@@ -114,7 +114,7 @@ export default class MyPlugin extends Plugin {
                     `${ATMOSPHERE_CLIENT}/private-page/${
                         this.settings.bskyHandle!
                     }/${
-                        this.settings.vaultMetadataCache.files[activeFile.path].rkey
+                        this.settings.vaultRkey + this.settings.vaultMetadataCache.files[activeFile.path].rkey
                     }/${
                         this.settings.vaultMetadataCache.files[activeFile.path].passphrase
                     }`,
