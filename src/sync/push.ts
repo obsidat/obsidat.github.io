@@ -47,7 +47,7 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
 
     if (settings.deleteMissingRemoteFiles) {
         for (const [rkey, file] of remoteFilesByRkey.entries()) {
-            if (localFilesByRkey.has(rkey)) {
+            if (!localFilesByRkey.has(rkey)) {
                 writes.push({
                     $type: 'com.atproto.repo.applyWrites#delete',
                     collection,
