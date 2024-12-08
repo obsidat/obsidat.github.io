@@ -143,7 +143,7 @@ export function fromBase32(string: string) {
 }
 
 export function toBase58(buffer: ArrayBufferLike) {
-    return ui8ToString(new Uint8Array(buffer), 'base58btc').toLowerCase();
+    return ui8ToString(new Uint8Array(buffer), 'base58btc');
 }
 
 export function fromBase58(string: string) {
@@ -262,27 +262,21 @@ export function toMap<K, V, T>(entries: T[], getKey: (entry: T) => K, getValue?:
         : new Map(entries.map(entry => [getKey(entry), entry]));
 }
 
-export function memoize<This, PropertyName extends string>() {
+export function memoize<This extends { constructor: NewableFunction }, PropertyName extends string>() {
     return function (target: This, propertyName: PropertyName, descriptor: TypedPropertyDescriptor<any>): void {
-        let cached: unknown | undefined;
-        let hasCached = false;
+        const cachedMap = new WeakMap<any, any>();
 
-        function get(getFunc: any) {
-            if (!hasCached) {
-                const result = getFunc();
-                hasCached = true;
-                return cached = result;
-            }
-
-            return cached;
-        }
-
-        if (descriptor.value != null) {
-			descriptor.value = (() => get(descriptor.value as any)) as any;
-		} else if (descriptor.get != null) {
-			descriptor.get = () => get(descriptor.get as any);
-		} else {
-            throw new Error(`memoize target ${target}.${propertyName} is not a method or getter`)
-        }
+        Object.defineProperty(target, propertyName, {
+            get() {
+                let cached = cachedMap.get(this);
+                if (!cached) {
+                    cached = (descriptor.value?.call(this) ?? descriptor.get?.call(this));
+                    cachedMap.set(this, cached);
+                    return cached;
+                }
+    
+                return cached;
+            },
+        })
     };
 }
