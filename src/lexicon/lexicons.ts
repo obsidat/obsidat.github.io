@@ -5,7 +5,7 @@ import "@atcute/client/lexicons";
 
 declare module "@atcute/client/lexicons" {
     namespace IoGithubObsidatFile {
-        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is also randomly generated (base58) but unique per-file per-vault. */
+        /** An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated passphrase. The rkey is `vault_tid || file_tid` (always 26 characters)  */
         interface Record {
             $type: "io.github.obsidat.file";
             /** The AGE encrypted file contents. */
@@ -131,7 +131,7 @@ declare module "@atcute/client/lexicons" {
     }
 
     namespace IoGithubObsidatVault {
-        /** An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base58. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 } */
+        /** An Obsidian vault. */
         interface Record {
             $type: "io.github.obsidat.vault";
             /** The AGE encrypted CBOR record containing vault metadata following the VaultMetadata interface specification in `src\sync\index.ts` */
@@ -145,10 +145,22 @@ declare module "@atcute/client/lexicons" {
         }
     }
 
+    namespace IoGithubObsidatVaults {
+        /** A collection of Obsidian vaults for this account. */
+        interface Record {
+            $type: "io.github.obsidat.vaults";
+            /** This record's creation date. */
+            createdAt: string;
+            /** The AGE encrypted CBOR record containing a list of vaults following the Vaults interface specification in `src\sync\index.ts` */
+            vaults: At.Bytes;
+        }
+    }
+
     interface Records {
         "io.github.obsidat.file": IoGithubObsidatFile.Record;
         "io.github.obsidat.publicFile": IoGithubObsidatPublicFile.Record;
         "io.github.obsidat.vault": IoGithubObsidatVault.Record;
+        "io.github.obsidat.vaults": IoGithubObsidatVaults.Record;
     }
 
     interface Queries {}

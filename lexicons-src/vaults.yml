@@ -1,0 +1,23 @@
+lexicon: 1
+id: io.github.obsidat.vaults
+defs:
+  main:
+    type: record
+    key: literal:self
+    description: >-
+      A collection of Obsidian vaults for this account.
+    record:
+      type: object
+      required:
+        - createdAt
+        - vaults
+      properties:
+        vaults:
+          type: bytes
+          description: >-
+            The AGE encrypted CBOR record containing a list of vaults following the Vaults interface
+            specification in `src\sync\index.ts`
+        createdAt:
+          type: string
+          format: datetime
+          description: This record's creation date.

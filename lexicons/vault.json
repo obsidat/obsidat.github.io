@@ -4,8 +4,8 @@
   "defs": {
     "main": {
       "type": "record",
-      "key": "any",
-      "description": "An Obsidian vault. The key is the scrypt hash of the passphrase + vault name as salt, in base58. Uses scrypt parameters { N: 2 ** 18, r: 8, p: 1, dkLen: 32 }",
+      "key": "tid",
+      "description": "An Obsidian vault.",
       "record": {
         "type": "object",
         "required": [

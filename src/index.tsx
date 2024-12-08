@@ -8,11 +8,12 @@ import { h } from '@jsx';
 
 import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
-import { ATMOSPHERE_CLIENT, Awaitable } from "./utils/index.ts";
+import { ATMOSPHERE_CLIENT, Awaitable, memoize } from "./utils/index.ts";
 import { doPush } from "./sync/push.ts";
 import { VaultMetadata } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
 import { doShare } from './sync/share.ts';
+import { XRPCEx } from './utils/xrpc-ex.ts';
 
 // Remember to rename these classes and interfaces!
 
@@ -26,7 +27,8 @@ export interface MyPluginSettings {
         state: Record<string, NodeSavedState>;
         session: Record<string, NodeSavedSession>;
     },
-    vaultMetadataCache: VaultMetadata,
+    vaultRkey?: string;
+    vaultMetadataCache: VaultMetadata;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
@@ -45,35 +47,29 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 
 export default class MyPlugin extends Plugin {
     settings: MyPluginSettings = DEFAULT_SETTINGS;
-    private _session?: FetchHandlerObject & { sub: At.DID; };
-    private _agent?: XRPC;
 
+    @memoize()
     private get session(): Awaitable<FetchHandlerObject & { sub: At.DID; }> {
         if (!this.settings.bskyHandle) throw new Error('No ATP handle defined in settings!');
 
-        if (this._session) return this._session;
-
         return (async () => {
-            return this._session = await new ObsidianAtpOauthClientXPlat(this.app).authenticate(this.settings.bskyHandle!);
+            return await new ObsidianAtpOauthClientXPlat(this.app).authenticate(this.settings.bskyHandle!);
         })();
     }
 
-    private get agent(): Awaitable<XRPC> {
-        if (this._agent) return this._agent;
-
+    @memoize()
+    private get agent(): Awaitable<XRPCEx> {
         return (async () => {
-            const rpc = new XRPC({ handler: await this.session });
+            const rpc = new XRPCEx({ handler: await this.session });
 
-            return this._agent = rpc;
+            return rpc;
         })();
     }
 
-    private _did?: At.DID;
+    @memoize()
     private get did(): Awaitable<At.DID> {
-        if (this._did) return this._did;
-        
         return (async () => {
-            const result = this._did = ((await this.session).sub
+            const result = ((await this.session).sub
                 ?? (this.settings.bskyHandle?.startsWith('did:') ? this.settings.bskyHandle : undefined!)
             ) as At.DID | undefined;
 

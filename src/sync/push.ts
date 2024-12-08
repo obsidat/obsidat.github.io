@@ -8,10 +8,11 @@ import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { getVaultMetadata } from "./vault-metadata";
+import { XRPCEx } from "../utils/xrpc-ex";
 
 const VERSION = 7;
 
-export async function doPush(agent: XRPC, plugin: MyPlugin) {
+export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     const uploadStartDate = new Date();
@@ -74,7 +75,7 @@ export async function doPush(agent: XRPC, plugin: MyPlugin) {
         const referencedFilePassphrases = app.metadataCache.resolvedLinks[file.path] ? Object.fromEntries(
             Object.entries(app.metadataCache.resolvedLinks[file.path])
                 .map(([k]) => [k, [
-                    vaultMetadata.files[k].rkey,
+                    vaultMetadata.rkey + vaultMetadata.files[k].rkey,
                     vaultMetadata.files[k].passphrase,
                 ]])
         ) satisfies FileMetadata['referencedFilePassphrases'] : undefined;

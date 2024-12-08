@@ -6,7 +6,6 @@ import { scryptToBase58Async } from "../utils";
  */
 export interface VaultMetadata {
     files: Record<string, VaultMetadataFile>;
-    vaultRkey?: string;
 }
 
 export interface VaultMetadataFile {
@@ -25,6 +24,15 @@ export interface FileMetadata {
     filePath: string;
     referencedFilePassphrases?: Record<string, [rkey: string, passphrase: string]>;
     fileLastCreatedOrModified: Date;
+}
+
+export interface Vaults {
+    vaults: VaultsVault[];
+}
+
+export interface VaultsVault {
+    name: string;
+    rkey: string;
 }
 
 export function getPublicFileRkey(file: TFile | { path: string, vaultName: string }): string {

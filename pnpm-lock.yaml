@@ -17,6 +17,9 @@ importers:
       '@atcute/oauth-browser-client':
         specifier: ^1.0.7
         version: 1.0.7
+      '@atcute/tid':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@atproto/api':
         specifier: ^0.13.18
         version: 0.13.18
@@ -217,6 +220,9 @@ packages:
 
   '@atcute/oauth-browser-client@1.0.7':
     resolution: {integrity: sha512-ikf3FscGZXYU+S0K4n9eDUMg6pS//g/Zr159+bznxO3Wn2JYBohEIxzy29OIEExXD/qAYMq9kfqvo2d0gs4JWQ==}
+
+  '@atcute/tid@1.0.1':
+    resolution: {integrity: sha512-3CjXIauzpIXi86MS1HLCDTzXmxtghSynNpWygd6pD/hnwJX4CK04ZU7S44qGVcLQmpiuAiGtqABkBAAK3V8BRw==}
 
   '@atcute/varint@1.0.1':
     resolution: {integrity: sha512-GXWu+CIfpQGSMSOSUskjwU/licxH8WcyX4t11mRKafQIE4Yi3v5GuchMYVOu89YX15tY93QzY/0zMQDCWoke8Q==}
@@ -3078,6 +3084,8 @@ snapshots:
     dependencies:
       '@atcute/client': 2.0.6
       nanoid: 5.0.9
+
+  '@atcute/tid@1.0.1': {}
 
   '@atcute/varint@1.0.1': {}
 

@@ -6,7 +6,12 @@ defs:
     key: any
     description: >-
       An Obsidian file. Its file path, vault name, and contents are encrypted using a randomly generated
-      passphrase. The rkey is also randomly generated (base58) but unique per-file per-vault.
+      passphrase.
+      
+      The rkey is `vault_tid || file_tid` (16 bytes, base32-sortable, always 26 characters) but this could
+      change later.
+      
+      The file TID is not accurate to record or file creation date.
     record:
       type: object
       required:
@@ -17,7 +22,7 @@ defs:
         version:
           type: integer
           description: >-
-            A newer version file always overrides an older version file. `undefined` is the lowest version.
+            A newer version file always overrides an older version file. `undefined` is the oldest version.
         body:
           type: blob
           description: >-

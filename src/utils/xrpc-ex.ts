@@ -1,18 +1,26 @@
-import { XRPC, XRPCResponse } from "@atcute/client";
+import { XRPC, XRPCError, XRPCResponse } from "@atcute/client";
 import { ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, Records } from "@atcute/client/lexicons";
 
 interface GetRecordParams<K extends keyof Records> extends ComAtprotoRepoGetRecord.Params { collection: K; }
 interface GetRecordOutput<K extends keyof Records> extends ComAtprotoRepoGetRecord.Output { value: Records[K]; }
 
-interface PutRecordParams<K extends keyof Records> extends ComAtprotoRepoPutRecord.Input { collection: K; }
-interface PutRecordOutput<K extends keyof Records> extends ComAtprotoRepoPutRecord.Output { value: Records[K]; }
+interface PutRecordParams<K extends keyof Records> extends ComAtprotoRepoPutRecord.Input { collection: K; record: Records[K]; }
+interface PutRecordOutput<K extends keyof Records> extends ComAtprotoRepoPutRecord.Output { }
 
-interface CreateRecordParams<K extends keyof Records> extends ComAtprotoRepoCreateRecord.Input { collection: K; }
-interface CreateRecordOutput<K extends keyof Records> extends ComAtprotoRepoCreateRecord.Output { value: Records[K]; }
+interface CreateRecordParams<K extends keyof Records> extends ComAtprotoRepoCreateRecord.Input { collection: K; record: Records[K]; }
+interface CreateRecordOutput<K extends keyof Records> extends ComAtprotoRepoCreateRecord.Output { }
 
 interface ListRecordsParams<K extends keyof Records> extends ComAtprotoRepoListRecords.Params { collection: K; }
 interface ListRecordsOutput<K extends keyof Records> extends ComAtprotoRepoListRecords.Output { records: ListRecordsRecord<K>[]; }
 interface ListRecordsRecord<K extends keyof Records> extends ComAtprotoRepoListRecords.Record { value: Records[K]; }
+
+export function isInvalidSwapError(err: unknown) {
+    return err instanceof XRPCError && err.kind === 'InvalidSwap';
+}
+
+export function isRecordNotFoundError(err: unknown) {
+    return err instanceof XRPCError && err.kind === 'RecordNotFound';
+}
 
 // TODO use
 export class XRPCEx extends XRPC {
@@ -22,6 +30,19 @@ export class XRPCEx extends XRPC {
         });
 
         return data as GetRecordOutput<K>;
+    }
+
+    async tryGetRecord<K extends keyof Records>(params: GetRecordParams<K>) {
+        try {
+            return await this.getRecord(params);
+        } catch (err) {
+            if (!isRecordNotFoundError(err)) throw err;
+            return {
+                uri: undefined,
+                value: undefined,
+                cid: undefined,
+            };
+        }
     }
 
     async listRecords<K extends keyof Records>(params: ListRecordsParams<K>) {
@@ -38,6 +59,17 @@ export class XRPCEx extends XRPC {
         });
 
         return data as PutRecordOutput<K>;
+    }
+    async trySwapRecord<K extends keyof Records>(params: PutRecordParams<K>) {
+        try {
+            await this.putRecord(params);
+            return true;
+        } catch (err) {
+            if (!isInvalidSwapError(err)) {
+                throw err;
+            }
+            return false;
+        }
     }
 
     async createRecord<K extends keyof Records>(params: CreateRecordParams<K>) {

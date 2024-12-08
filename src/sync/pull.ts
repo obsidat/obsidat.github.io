@@ -9,8 +9,9 @@ import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { fromCbor } from "../utils/cbor";
 import { getVaultMetadata } from "./vault-metadata";
+import { XRPCEx } from "../utils/xrpc-ex";
 
-export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
+export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     const collection = 'io.github.obsidat.file';
@@ -33,7 +34,7 @@ export async function doPull(agent: XRPC, did: At.DID, plugin: MyPlugin) {
     const localFilesByRkey = CaseInsensitiveMap.toMap(
         localFileList.filter(e => e instanceof TFile),
 
-        file => vaultMetadata.files[file.path].rkey,
+        file => vaultMetadata.rkey + vaultMetadata.files[file.path].rkey,
         file => ({
             ...file,
             fileLastCreatedOrModified: Math.max(file.stat.ctime, file.stat.mtime),
