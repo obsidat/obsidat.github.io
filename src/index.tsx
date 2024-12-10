@@ -178,7 +178,7 @@ export default class MyPlugin extends Plugin {
                         super(app);
                         this.setTitle(`Publishing ${activeFile!.path} to @${settings.bskyHandle}`);
 
-                        const beautyDiv: HTMLElement = <div $parent={this.contentEl}>
+                        <div $parent={this.contentEl}>
                             <h1>
                                 Publishing {activeFile!.path} to @{settings.bskyHandle}
                             </h1>
@@ -200,9 +200,7 @@ export default class MyPlugin extends Plugin {
                                     .onClick(() => {
                                         this.close();
                                         onSubmit();
-                                    }));
-
-                        new Setting(this.contentEl)
+                                    }))
                             .addButton(button =>
                                 button
                                     .setButtonText('Cancel')

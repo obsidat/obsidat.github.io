@@ -31,9 +31,7 @@ class OAuthFinalizationModal extends Modal {
                     .onClick(() => {
                         this.close();
                         onSubmit(oauthSearch);
-                    }));
-
-        new Setting(this.contentEl)
+                    }))
             .addButton((btn) =>
                 btn
                     .setButtonText('Cancel')
