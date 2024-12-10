@@ -52,7 +52,8 @@ export interface ListRecordsRecord<K extends keyof Records> {
     rkey: string;
 }
 
-export function rkey(uri: At.Uri) {
+export function rkey(uri: At.Uri | { uri: At.Uri }) {
+    if (typeof uri !== 'string') uri = uri.uri;
     return uri.slice(uri.lastIndexOf('/') + 1);
 }
 

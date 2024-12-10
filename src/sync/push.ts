@@ -1,18 +1,19 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
-import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
-import { paginatedListRecords, isCidMatching, chunks, toMap } from "../utils";
-import MyPlugin, { MyPluginSettings } from "..";
-import { FileMetadata } from ".";
+import { Brand, type ComAtprotoRepoApplyWrites, type IoGithubObsidatFile } from "@atcute/client/lexicons";
+import { paginatedListRecords, isCidMatching, chunks, toMap, rkey } from "../utils";
+import MyPlugin, { type MyPluginSettings } from "..";
+import type { FileMetadata } from ".";
 import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { getVaultMetadata } from "./vault-metadata";
 import { XRPCEx } from "../utils/xrpc-ex";
+import type { KittyAgent } from "../utils/kitty-agent";
 
 const VERSION = 7;
 
-export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
+export async function doPush(agent: KittyAgent, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     const uploadStartDate = new Date();
@@ -21,11 +22,19 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
 
     const vaultMetadata = await getVaultMetadata(agent, plugin);
 
-    const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
+    const { records: remoteFiles } = await agent.paginatedList({
+        repo: settings.bskyHandle!,
+        collection
+    });
 
-    const remoteFilesByRkey = toMap(remoteFiles, file => file.rkey, file => file.value);
+    const remoteFilesByRkey = toMap(
+        remoteFiles,
+        file => rkey(file), file => file.value
+    );
 
-    const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
+    const writes: Brand.Union<
+        ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update
+    >[] = [];
 
     const localFileList = app.vault.getAllLoadedFiles();
 
@@ -102,13 +111,11 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
             }
         }
 
-        const uploadBlobOutput = await agent.call('com.atproto.repo.uploadBlob', {
-            data: encryptedFileData
-        });
+        const blob = await agent.uploadBlob(encryptedFileData);
 
         const value = {
             $type: 'io.github.obsidat.file',
-            body: uploadBlobOutput.data.blob,
+            body: blob,
             metadata: encryptedFileMeta,
             recordCreatedAt: new Date().toISOString(),
             version: VERSION,
@@ -123,12 +130,10 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
     }
 
     for (const chunk of chunks(writes, 200)) {
-        agent.call('com.atproto.repo.applyWrites', {
-            data: {
-                repo: settings.bskyHandle!,
-                writes: chunk
-            }
-        })
+        await agent.batchWrite({
+            repo: settings.bskyHandle!,
+            writes: chunk
+        });
     }
 
     new Notice(`Done synchronizing ${localFilesByRkey.size} files to remote repo @${settings.bskyHandle}.`);

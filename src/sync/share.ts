@@ -1,22 +1,33 @@
 import { App, MarkdownView, Notice, TFile } from "obsidian";
-import { paginatedListRecords, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
+import { paginatedListRecords, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts, rkey } from "../utils";
 import { XRPC } from "@atcute/client";
 import { Brand, type ComAtprotoRepoApplyWrites, type IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import MyPlugin, { type MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
 import { getPublicFileRkey } from ".";
+import type { KittyAgent } from "../utils/kitty-agent";
 
-export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings: MyPluginSettings, files: string[]) {
+export async function doShare(agent: KittyAgent, app: App, plugin: MyPlugin, settings: MyPluginSettings, files: string[]) {
     const currentDate = new Date();
 
     const collection = 'io.github.obsidat.publicFile';
 
-    const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
+    const { records: remoteFiles } = await agent.paginatedList({
+        repo: settings.bskyHandle!,
+        collection
+    });
 
-    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
+    const remoteFilesByRkey = CaseInsensitiveMap.toMap(
+        remoteFiles,
+        file => rkey(file), file => file.value
+    );
 
-    const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
+    const writes: Brand.Union<
+        ComAtprotoRepoApplyWrites.Create |
+        ComAtprotoRepoApplyWrites.Delete |
+        ComAtprotoRepoApplyWrites.Update
+    >[] = [];
 
     new Notice(`Sharing ${files.length} files to @${settings.bskyHandle}...`);
 
@@ -72,15 +83,15 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
             }
         }
 
-        const uploadBlobOutput = await agent.call('com.atproto.repo.uploadBlob', {
-            data: new Blob([fileData], { type: detectMimeType(file.path) })
-        });
+        const blob = await agent.uploadBlob(
+            new Blob([fileData], { type: detectMimeType(file.path) })
+        );
 
         const fileCache = app.metadataCache.getFileCache(file);
 
         const value = {
             $type: 'io.github.obsidat.publicFile',
-            body: uploadBlobOutput.data.blob,
+            body: blob,
             filePath: file.path,
             vaultName: file.vault.getName(),
             title: fileCache?.frontmatter?.title ?? fileCache?.frontmatter?.name,
@@ -105,12 +116,10 @@ export async function doShare(agent: XRPC, app: App, plugin: MyPlugin, settings:
     }
 
     for (const chunk of chunks(writes, 200)) {
-        agent.call('com.atproto.repo.applyWrites', {
-            data: {
-                repo: settings.bskyHandle!,
-                writes: chunk
-            }
-        })
+        await agent.batchWrite({
+            repo: settings.bskyHandle!,
+            writes: chunk
+        });
     }
 
     new Notice(`Shared ${files.length} files to @${settings.bskyHandle}`);

@@ -1,17 +1,18 @@
 import { App, Notice, TFile } from "obsidian";
-import { paginatedListRecords, toMap } from "../utils";
+import { paginatedListRecords, rkey, toMap } from "../utils";
 import { XRPC } from "@atcute/client";
-import { At } from "@atcute/client/lexicons";
-import MyPlugin, { MyPluginSettings } from "..";
-import { FileMetadata } from ".";
+import type { At } from "@atcute/client/lexicons";
+import MyPlugin, { type MyPluginSettings } from "..";
+import type { FileMetadata } from ".";
 import { decryptBlob, decryptInlineData, downloadFileBlob } from "../utils/crypto-utils";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { decode as decodeCbor, encode as encodeCbor } from 'cbor-x';
 import { fromCbor } from "../utils/cbor";
 import { getVaultMetadata } from "./vault-metadata";
 import { XRPCEx } from "../utils/xrpc-ex";
+import type { KittyAgent } from "../utils/kitty-agent";
 
-export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
+export async function doPull(agent: KittyAgent, did: At.DID, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     const collection = 'io.github.obsidat.file';
@@ -24,9 +25,12 @@ export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
         ([path, file]) => ({ path, ...file }),
     );
 
-    const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
+    const { records: remoteFiles } = await agent.paginatedList({
+        repo: settings.bskyHandle!,
+        collection
+    });
 
-    const remoteFilesByRkey = toMap(remoteFiles, file => file.rkey, file => file.value);
+    const remoteFilesByRkey = toMap(remoteFiles, file => rkey(file), file => file.value);
 
     const localFileList = app.vault.getAllLoadedFiles();
     localFileList.splice(0, 1); // why?

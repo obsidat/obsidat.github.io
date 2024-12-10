@@ -1,5 +1,5 @@
 import { type RPCOptions, XRPC, XRPCError, type XRPCOptions, type XRPCRequestOptions, type XRPCResponse } from "@atcute/client";
-import type { At, ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, ComAtprotoSyncGetBlob, ComAtprotoSyncListBlobs, Procedures, Queries, Records } from "@atcute/client/lexicons";
+import type { At, ComAtprotoRepoApplyWrites, ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, ComAtprotoSyncGetBlob, ComAtprotoSyncListBlobs, Procedures, Queries, Records } from "@atcute/client/lexicons";
 
 interface GetRecordParams<K extends keyof Records> extends ComAtprotoRepoGetRecord.Params { collection: K; }
 interface GetRecordOutput<K extends keyof Records> extends ComAtprotoRepoGetRecord.Output { value: Records[K]; }
@@ -88,7 +88,7 @@ export class KittyAgent<X extends XRPC = XRPC> {
         return data as GetRecordOutput<K>;
     }
 
-    async getBlob(params: ComAtprotoSyncGetBlob.Params): Promise<ArrayBuffer> {
+    async getBlob(params: ComAtprotoSyncGetBlob.Params): Promise<Uint8Array> {
         const data = await this.query('com.atproto.sync.getBlob', params);
 
         return data;
@@ -117,6 +117,12 @@ export class KittyAgent<X extends XRPC = XRPC> {
         const data = await this.call('com.atproto.repo.putRecord', params);
 
         return data as PutRecordOutput<K>;
+    }
+
+    async uploadBlob(buf: Uint8Array | Blob) {
+        const data = await this.call('com.atproto.repo.uploadBlob', buf);
+
+        return data.blob;
     }
 
     async trySwap<K extends keyof Records>(params: PutRecordParams<K>) {
@@ -229,5 +235,9 @@ export class KittyAgent<X extends XRPC = XRPC> {
         } while (cursor);
     
         return { cids, cursor };
+    }
+
+    async batchWrite(params: ComAtprotoRepoApplyWrites.Input) {
+        return await this.call('com.atproto.repo.applyWrites', params);
     }
 }

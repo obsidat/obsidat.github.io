@@ -51,7 +51,7 @@ export default class MyPlugin extends Plugin {
     settings: MyPluginSettings = DEFAULT_SETTINGS;
 
     @memoize()
-    private get session(): Awaitable<FetchHandlerObject & { sub: At.DID; }> {
+    private get session() {
         if (!this.settings.bskyHandle) throw new Error('No ATP handle defined in settings!');
 
         return (async () => {
@@ -60,16 +60,16 @@ export default class MyPlugin extends Plugin {
     }
 
     @memoize()
-    private get agent(): Awaitable<XRPCEx> {
+    private get agent() {
         return (async () => {
             const rpc = new XRPCEx({ handler: await this.session });
 
-            return rpc;
+            return new KittyAgent<XRPCEx>(rpc);
         })();
     }
 
     @memoize()
-    private get did(): Awaitable<At.DID> {
+    private get did() {
         return (async () => {
             const result = ((await this.session).sub
                 ?? (this.settings.bskyHandle?.startsWith('did:') ? this.settings.bskyHandle : undefined!)
@@ -140,7 +140,7 @@ export default class MyPlugin extends Plugin {
                         reject();
                     }).open();
                 }).then(async () => {
-                    await doWipe(new KittyAgent(await this.agent), this);
+                    await doWipe(await this.agent, this);
                 });
             }
         })
