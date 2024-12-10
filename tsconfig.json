@@ -21,7 +21,7 @@
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "verbatimModuleSyntax": false, // required for lex-cli
+    "verbatimModuleSyntax": true,
     "paths": {
       "@lexicon/*": ["./lexicon/types/*"],
       "@jsx": ["./src/createElement-tsx.ts"]

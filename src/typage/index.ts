@@ -4,7 +4,7 @@ import { hkdf } from "@noble/hashes/hkdf"
 import { sha256 } from "@noble/hashes/sha256"
 import { randomBytes } from "@noble/hashes/utils"
 import * as x25519 from "./x25519.ts"
-import { scryptUnwrap, scryptWrap, x25519Identity, x25519Unwrap, x25519Wrap } from "./recipients.ts"
+import { scryptUnwrap, scryptWrap, type x25519Identity, x25519Unwrap, x25519Wrap } from "./recipients.ts"
 import { encodeHeader, encodeHeaderNoMAC, parseHeader, Stanza } from "./format.ts"
 import { decryptSTREAM, encryptSTREAM } from "./stream.ts"
 

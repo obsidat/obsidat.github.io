@@ -1,8 +1,8 @@
 import { XRPC, XRPCError } from "@atcute/client";
-import { getVaultRkey, VaultMetadata, Vaults } from ".";
-import MyPlugin, { MyPluginSettings } from "..";
+import type { getVaultRkey, VaultMetadata, Vaults } from ".";
+import MyPlugin, { type MyPluginSettings } from "..";
 import { App, TFile } from "obsidian";
-import { IoGithubObsidatVault, IoGithubObsidatVaults } from "@atcute/client/lexicons";
+import type { IoGithubObsidatVault, IoGithubObsidatVaults } from "@atcute/client/lexicons";
 import { decryptInlineData, encryptInlineData } from "../utils/crypto-utils";
 import { decode as decodeCbor, encode as encodeCbor } from "cbor-x";
 import { randomBytes } from "@noble/hashes/utils";

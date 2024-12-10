@@ -2,15 +2,15 @@ import { App, Editor, FileView, MarkdownView, Modal, Notice, Plugin, PluginSetti
 
 import type { NodeSavedSession, NodeSavedState } from "@atproto/oauth-client-node";
 import type { SessionManager } from "@atproto/api/dist/session-manager";
-import { FetchHandlerObject, XRPC } from '@atcute/client';
-import { At } from "@atcute/client/lexicons";
+import type { FetchHandlerObject, XRPC } from '@atcute/client';
+import type { At } from "@atcute/client/lexicons";
 import { h } from '@jsx';
 
 import { generatePassphrase } from "./encryption.ts";
 import { ObsidianAtpOauthClientXPlat } from "./oauth-xplat.ts";
-import { ATMOSPHERE_CLIENT, Awaitable, memoize } from "./utils/index.ts";
+import { ATMOSPHERE_CLIENT, type Awaitable, memoize } from "./utils/index.ts";
 import { doPush } from "./sync/push.ts";
-import { VaultMetadata } from "./sync/index.ts";
+import type { VaultMetadata } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
 import { doShare } from './sync/share.ts';
 import { XRPCEx } from './utils/xrpc-ex.ts';

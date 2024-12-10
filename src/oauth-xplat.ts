@@ -1,7 +1,8 @@
 import { configureOAuth, createAuthorizationUrl, finalizeAuthorization, getSession, OAuthUserAgent, resolveFromIdentity } from '@atcute/oauth-browser-client';
-import { ObsidianAtpOauthClient } from './oauth';
+import type { ObsidianAtpOauthClient } from './oauth';
 import { App, Modal, Setting } from 'obsidian';
 import type { FetchHandlerObject } from '@atcute/client';
+import type { At } from '@atcute/client/lexicons';
 
 configureOAuth({
     metadata: {

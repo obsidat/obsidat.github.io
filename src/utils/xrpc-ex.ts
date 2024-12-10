@@ -1,5 +1,5 @@
-import { XRPC, XRPCError, XRPCResponse } from "@atcute/client";
-import { At, ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, ComAtprotoSyncListBlobs, Records } from "@atcute/client/lexicons";
+import { XRPC, XRPCError, type XRPCResponse } from "@atcute/client";
+import type { At, ComAtprotoRepoCreateRecord, ComAtprotoRepoGetRecord, ComAtprotoRepoListRecords, ComAtprotoRepoPutRecord, ComAtprotoSyncListBlobs, Records } from "@atcute/client/lexicons";
 import '@atcute/client/lexicons';
 
 interface GetRecordParams<K extends keyof Records> extends ComAtprotoRepoGetRecord.Params { collection: K; }

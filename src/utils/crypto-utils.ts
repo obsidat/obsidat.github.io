@@ -1,5 +1,5 @@
 import { XRPC } from "@atcute/client";
-import { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
+import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import { decryptData, encryptData } from "../encryption";
 import { arrayBufferToBase64, base64ToArrayBuffer, splitFirst } from ".";
 import { getPdsEndpoint, type DidDocument } from "@atcute/client/utils/did";

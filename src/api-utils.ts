@@ -1,7 +1,7 @@
 import { CredentialManager, XRPC } from "@atcute/client";
-import { DidDocument, getPdsEndpoint } from "@atcute/client/utils/did";
+import { type DidDocument, getPdsEndpoint } from "@atcute/client/utils/did";
 import { getDid, getHandle } from "./utils";
-import { At } from "@atcute/client/lexicons";
+import type { At } from "@atcute/client/lexicons";
 
 export interface ActorInfo {
     pdsEndpoint?: string;

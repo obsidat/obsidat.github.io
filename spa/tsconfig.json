@@ -17,6 +17,8 @@
     "checkJs": true,
     "isolatedModules": true,
 
+    "verbatimModuleSyntax": true,
+
     "paths": {
       "@parent/*": ["../src/*"],
     },

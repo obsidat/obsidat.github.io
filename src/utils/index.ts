@@ -1,11 +1,11 @@
-import { XRPC, XRPCResponse } from "@atcute/client";
+import { XRPC, type XRPCResponse } from "@atcute/client";
 import type { At, Brand, ComAtprotoRepoListRecords, IoGithubObsidatGeneric, IoGithubObsidatPublicFile, Records } from "@atcute/client/lexicons";
 import { type DuplicationProcessWay, type IMimeTypes, MimeType } from 'mime-type';
 import db from 'mime-db';
 import { sha256 } from '@noble/hashes/sha256';
 import { parse as parseCid, create as createCid, format as formatCid } from '@atcute/cid';
 import { blake3 } from "@noble/hashes/blake3";
-import { DidDocument } from "@atcute/client/utils/did";
+import type { DidDocument } from "@atcute/client/utils/did";
 import { toString as ui8ToString, fromString as ui8FromString } from 'uint8arrays';
 import { fromString, toString } from 'uint8arrays';
 import { scrypt, scryptAsync } from "@noble/hashes/scrypt";

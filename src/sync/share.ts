@@ -1,8 +1,8 @@
 import { App, MarkdownView, Notice, TFile } from "obsidian";
 import { paginatedListRecords, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts } from "../utils";
 import { XRPC } from "@atcute/client";
-import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
-import MyPlugin, { MyPluginSettings } from "..";
+import { Brand, type ComAtprotoRepoApplyWrites, type IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
+import MyPlugin, { type MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
 import { getPublicFileRkey } from ".";
