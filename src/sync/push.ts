@@ -1,7 +1,7 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
 import { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
-import { paginatedListRecords, isCidMatching, chunks } from "../utils";
+import { paginatedListRecords, isCidMatching, chunks, toMap } from "../utils";
 import MyPlugin, { MyPluginSettings } from "..";
 import { FileMetadata } from ".";
 import { encryptBlob, encryptInlineData } from "../utils/crypto-utils";
@@ -23,7 +23,7 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
 
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
-    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
+    const remoteFilesByRkey = toMap(remoteFiles, file => file.rkey, file => file.value);
 
     const writes: Brand.Union<ComAtprotoRepoApplyWrites.Create | ComAtprotoRepoApplyWrites.Delete | ComAtprotoRepoApplyWrites.Update>[] = [];
 
@@ -32,7 +32,7 @@ export async function doPush(agent: XRPCEx, plugin: MyPlugin) {
     console.log(localFileList);
     localFileList.splice(0, 1); // why?
 
-    const localFilesByRkey = CaseInsensitiveMap.toMap(
+    const localFilesByRkey = toMap(
         localFileList.filter(e => e instanceof TFile),
         file => vaultMetadata.rkey + vaultMetadata.files[file.path].rkey,
         file => ({

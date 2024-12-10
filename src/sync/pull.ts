@@ -1,5 +1,5 @@
 import { App, Notice, TFile } from "obsidian";
-import { paginatedListRecords } from "../utils";
+import { paginatedListRecords, toMap } from "../utils";
 import { XRPC } from "@atcute/client";
 import { At } from "@atcute/client/lexicons";
 import MyPlugin, { MyPluginSettings } from "..";
@@ -18,7 +18,7 @@ export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
 
     const vaultMetadata = await getVaultMetadata(agent, plugin);
 
-    const vaultMetadataFilesByRkey = CaseInsensitiveMap.toMap(
+    const vaultMetadataFilesByRkey = toMap(
         Object.entries(vaultMetadata.files),
         ([path, file]) => file.rkey,
         ([path, file]) => ({ path, ...file }),
@@ -26,12 +26,12 @@ export async function doPull(agent: XRPCEx, did: At.DID, plugin: MyPlugin) {
 
     const remoteFiles = await paginatedListRecords(agent, settings.bskyHandle!, collection);
 
-    const remoteFilesByRkey = CaseInsensitiveMap.toMap(remoteFiles, file => file.rkey, file => file.value);
+    const remoteFilesByRkey = toMap(remoteFiles, file => file.rkey, file => file.value);
 
     const localFileList = app.vault.getAllLoadedFiles();
     localFileList.splice(0, 1); // why?
 
-    const localFilesByRkey = CaseInsensitiveMap.toMap(
+    const localFilesByRkey = toMap(
         localFileList.filter(e => e instanceof TFile),
 
         file => vaultMetadata.rkey + vaultMetadata.files[file.path].rkey,
