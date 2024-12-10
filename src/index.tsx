@@ -14,6 +14,8 @@ import { VaultMetadata } from "./sync/index.ts";
 import { doPull } from "./sync/pull.ts";
 import { doShare } from './sync/share.ts';
 import { XRPCEx } from './utils/xrpc-ex.ts';
+import { KittyAgent } from './utils/kitty-agent.ts';
+import { doWipe } from './sync/wipe.ts';
 
 // Remember to rename these classes and interfaces!
 
@@ -90,6 +92,58 @@ export default class MyPlugin extends Plugin {
         this.addRibbonIcon('arrow-down-from-line', 'Pull changes from AT Protocol', async (evt: MouseEvent) => {
             doPull(await this.agent, await this.did, this);
         });
+
+        this.addCommand({
+            id: 'wipe-repo',
+            name: 'Delete remote synced vault',
+            callback: () => {
+                const settings = this.settings;
+                const app = this.app;
+                class VerifyPromptModal extends Modal {
+                    constructor(app: App, onSubmit: () => void, onCancel: () => void) {
+                        super(app);
+                        this.setTitle(`Deleting ${app.vault.getName()} from the remote repository!`);
+
+                        <div $parent={this.contentEl}>
+                            <p>
+                                This will delete <b>ALL FILES</b> from your synced repo. It will not affect
+                                local files.
+                            </p>
+                        </div>
+
+                        new Setting(this.contentEl)
+                            .addButton(button =>
+                                button
+                                    .setButtonText('Submit')
+                                    .setCta()
+                                    .onClick(() => {
+                                        this.close();
+                                        onSubmit();
+                                    }))
+                            .addButton(button =>
+                                button
+                                    .setButtonText('Cancel')
+                                    .setCta()
+                                    .onClick(() => {
+                                        this.close();
+                                        onCancel();
+                                    }));
+                    }
+                }
+
+                new Promise<void>((resolve, reject) => {
+                    new VerifyPromptModal(this.app, () => {
+                        // submit
+                        resolve();
+                    }, () => {
+                        // cancel
+                        reject();
+                    }).open();
+                }).then(async () => {
+                    await doWipe(new KittyAgent(await this.agent), this);
+                });
+            }
+        })
         
         this.addCommand({
             id: 'open-synced-page',
@@ -290,7 +344,7 @@ export default class MyPlugin extends Plugin {
 
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, {
-            passphrase: generatePassphrase(),
+            passphrase: generatePassphrase(16*8), // 16 bytes, 128 bits
         }, await this.loadData());
     }
 

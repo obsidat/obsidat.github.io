@@ -52,6 +52,10 @@ export interface ListRecordsRecord<K extends keyof Records> {
     rkey: string;
 }
 
+export function rkey(uri: At.Uri) {
+    return uri.slice(uri.lastIndexOf('/') + 1);
+}
+
 export async function paginatedListRecords<K extends keyof Records>(agent: XRPC, repo: string, collection: K) {
     const results: ListRecordsRecord<K>[] = [];
 

@@ -9,13 +9,14 @@ import { randomBytes } from "@noble/hashes/utils";
 import { toBase58 } from "../utils";
 import { isInvalidSwapError, XRPCEx } from "../utils/xrpc-ex";
 import { now as tidNow } from '@atcute/tid';
+import { KittyAgent } from "../utils/kitty-agent";
 
-async function tryGetVaultMetadata(agent: XRPCEx, plugin: MyPlugin) {
+async function tryGetVaultMetadata(agent: KittyAgent, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     const collection = 'io.github.obsidat.vault';
 
-    let { value: vault, cid } = await agent.tryGetRecord({
+    let { value: vault, cid } = await agent.tryGet({
         repo: settings.bskyHandle!,
         collection,
         rkey: settings.vaultRkey!
@@ -47,7 +48,7 @@ async function tryGetVaultMetadata(agent: XRPCEx, plugin: MyPlugin) {
 
     await plugin.saveSettings();
 
-    return await agent.trySwapRecord({
+    return await agent.trySwap({
         repo: settings.bskyHandle!,
         collection,
         rkey: settings.vaultRkey!,
@@ -68,10 +69,10 @@ async function tryGetVaultMetadata(agent: XRPCEx, plugin: MyPlugin) {
     });
 }
 
-async function tryFindOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
+async function tryFindOrAddVaultToVaults(agent: KittyAgent, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
-    let { value, cid } = await agent.tryGetRecord({
+    let { value, cid } = await agent.tryGet({
         repo: settings.bskyHandle!,
         collection: 'io.github.obsidat.vaults',
         rkey: 'self'
@@ -106,7 +107,7 @@ async function tryFindOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
         return vaultRkey;
     }
 
-    if (await agent.trySwapRecord({
+    if (await agent.trySwap({
         repo: settings.bskyHandle!,
         collection: 'io.github.obsidat.vaults',
         rkey: 'self',
@@ -126,7 +127,7 @@ async function tryFindOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
     return undefined;
 }
 
-async function findOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
+async function findOrAddVaultToVaults(agent: KittyAgent, plugin: MyPlugin) {
     let vaultRkey: string | undefined;
 
     let retries = 10;
@@ -138,7 +139,7 @@ async function findOrAddVaultToVaults(agent: XRPCEx, plugin: MyPlugin) {
     return vaultRkey!;
 }
 
-export async function getVaultMetadata(agent: XRPCEx, plugin: MyPlugin) {
+export async function getVaultMetadata(agent: KittyAgent, plugin: MyPlugin) {
     const { app, settings } = plugin;
 
     settings.vaultRkey ??= await findOrAddVaultToVaults(agent, plugin);

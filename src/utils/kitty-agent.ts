@@ -48,11 +48,11 @@ type DataThenParams<T>
         : [];
 
 // TODO use
-export class KittyAgent {
-    public readonly xrpc: XRPC;
+export class KittyAgent<X extends XRPC = XRPC> {
+    public readonly xrpc: X;
 
-    constructor(opts: XRPCOptions | XRPC) {
-        this.xrpc = opts instanceof XRPC ? opts : new XRPC(opts);
+    constructor(opts: XRPCOptions | X) {
+        this.xrpc = opts instanceof XRPC ? opts as X : new XRPC(opts) as X;
     }
 
     /** Makes a request to the XRPC service */
