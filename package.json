@@ -7,7 +7,7 @@
     "dev": "vite build --watch --mode development",
     "build": "tsc -noEmit -skipLibCheck && vite build --mode production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
-    "lex": "tsx utils/yaml2json -i \"./lexicons-src/*.yml\" -o \"./lexicons\" && tsx utils/glob-run lex-cli generate -o \"./src/lexicon/lexicons.ts\" \"./lexicons/*\" && tsx utils/glob-run lex-cli generate-main -o \"./src/lexicon/index.ts\" \"./lexicons/*\""
+    "lex": "tsx utils/yaml2json -i \"./lexicons-src/*.yml\" -o \"./lexicons\" && tsx utils/glob-run lex-cli generate -o \"./src/lexicon/lexicons.ts\" \"./lexicons/*\""
   },
   "keywords": [],
   "author": "",
