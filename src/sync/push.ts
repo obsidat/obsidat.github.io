@@ -1,6 +1,6 @@
 import { App, Notice, TFile } from "obsidian";
 import { XRPC } from "@atcute/client";
-import { Brand, type ComAtprotoRepoApplyWrites, type IoGithubObsidatFile } from "@atcute/client/lexicons";
+import type { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatFile } from "@atcute/client/lexicons";
 import { paginatedListRecords, isCidMatching, chunks, toMap, rkey } from "../utils";
 import MyPlugin, { type MyPluginSettings } from "..";
 import type { FileMetadata } from ".";

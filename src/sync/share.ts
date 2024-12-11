@@ -1,14 +1,16 @@
-import { App, MarkdownView, Notice, TFile } from "obsidian";
+import { type App, type MarkdownView, Notice, TFile } from "obsidian";
 import { paginatedListRecords, isCidMatching, detectMimeType, chunks, toKeyValuePairs, ATMOSPHERE_CLIENT, toPageAndLinkCounts, rkey } from "../utils";
 import { XRPC } from "@atcute/client";
-import { Brand, type ComAtprotoRepoApplyWrites, type IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
+import type { Brand, ComAtprotoRepoApplyWrites, IoGithubObsidatPublicFile } from "@atcute/client/lexicons";
 import MyPlugin, { type MyPluginSettings } from "..";
 import { CaseInsensitiveMap } from "../utils/cim";
 import { MyMarkdownRenderer } from "../markdown-renderer/renderer";
 import { getPublicFileRkey } from ".";
 import type { KittyAgent } from "../utils/kitty-agent";
 
-export async function doShare(agent: KittyAgent, app: App, plugin: MyPlugin, settings: MyPluginSettings, files: string[]) {
+export async function doShare(agent: KittyAgent, plugin: MyPlugin, files: string[], view: MarkdownView) {
+    const { app, settings } = plugin;
+
     const currentDate = new Date();
 
     const collection = 'io.github.obsidat.publicFile';
@@ -71,7 +73,7 @@ export async function doShare(agent: KittyAgent, app: App, plugin: MyPlugin, set
                 highDPIDiagrams: true,
                 injectAppCSS: 'none',
                 linkStrippingBehaviour: 'link',
-            }).render({ data: markdown } as MarkdownView, markdown, file.path));
+            }).render(view, markdown, file.path));
         }
 
         const remoteFile = remoteFilesByRkey.get(rkey);

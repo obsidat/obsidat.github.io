@@ -180,7 +180,9 @@ export function hashToBase32(password: string | Uint8Array, salt: string | Uint8
     return toBase32(blake3(input));
 }
 
-export function toPageAndLinkCounts(linksAndCounts: Record<string, number>): IoGithubObsidatPublicFile.PageAndLinkCount[] {
+export function toPageAndLinkCounts(linksAndCounts?: Record<string, number>): IoGithubObsidatPublicFile.PageAndLinkCount[] {
+    if (!linksAndCounts) return [];
+
     return Object.entries(linksAndCounts)
         .map(([link, count]) => ({
             page: link,
@@ -233,7 +235,9 @@ export function toGenericValue(value: unknown): Brand.Union<
     throw new Error('Unsupported type: ' + typeof value);
 }
 
-export const ATMOSPHERE_CLIENT = `https://obsidat.github.io/#`;
+export const ATMOSPHERE_CLIENT = import.meta.env.PROD
+    ? `https://obsidat.github.io/#`
+    : 'http://localhost:5050/#';
 
 export function splitFirst(string: string, separator: string): [left: string, right: string] {
     const idx = string.indexOf(separator);

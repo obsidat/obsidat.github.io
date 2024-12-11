@@ -2,22 +2,21 @@ import { CredentialManager, XRPC } from "@atcute/client";
 import { type DidDocument, getPdsEndpoint } from "@atcute/client/utils/did";
 import { getDid, getHandle } from "./utils";
 import type { At } from "@atcute/client/lexicons";
+import { KittyAgent } from "./utils/kitty-agent";
 
 export interface ActorInfo {
     pdsEndpoint?: string;
     did: At.DID;
     handle?: string;
-    pdsAgent: XRPC;
+    pdsAgent: KittyAgent;
 }
 
-export async function getActorInfo(agent: XRPC, didOrHandle: string): Promise<ActorInfo> {
-    const describeRepoResponse = await agent.get('com.atproto.repo.describeRepo', {
-        params: {
-            repo: didOrHandle
-        }
+export async function getActorInfo(agent: KittyAgent, didOrHandle: string): Promise<ActorInfo> {
+    const describeRepoResponse = await agent.query('com.atproto.repo.describeRepo', {
+        repo: didOrHandle
     });
 
-    const didDoc = describeRepoResponse.data.didDoc as DidDocument | undefined;
+    const didDoc = describeRepoResponse.didDoc as DidDocument | undefined;
 
     const pdsEndpoint = didDoc ? getPdsEndpoint(didDoc) : undefined;
     let did = didDoc ? getDid(didDoc) : undefined;
@@ -25,25 +24,21 @@ export async function getActorInfo(agent: XRPC, didOrHandle: string): Promise<Ac
 
     if (!did) {
         const didResponse = !didOrHandle.startsWith('did:')
-            ? await agent.get('com.atproto.identity.resolveHandle', {
-                params: {
-                    handle: didOrHandle
-                }
+            ? await agent.query('com.atproto.identity.resolveHandle', {
+                handle: didOrHandle
             })
             : {
-                data: {
-                    did: handle as At.DID
-                }
+                did: handle as At.DID
             };
 
-        did = didResponse.data.did;
+        did = didResponse.did;
     }
 
-    const pdsAgent = pdsEndpoint ? new XRPC({
+    const pdsAgent = pdsEndpoint ? new KittyAgent(new XRPC({
         handler: new CredentialManager({
             service: pdsEndpoint
         })
-    }) : agent;
+    })) : agent;
 
     return {
         pdsEndpoint,

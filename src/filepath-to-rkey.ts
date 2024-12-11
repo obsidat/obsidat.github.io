@@ -11,25 +11,25 @@ must be permissible to include in a path component of a URI (following RFC-3986,
 export function filepathToRkey(vaultName: string, filepath: string) {
     if (filepath === '') throw new Error('File path is empty!');
 
-    filepath = 
-        vaultName.replace(/[^A-Za-z0-9.\-_:~]+/g, '-').replace(/_+/g, '-') +
+    filepath = `${
+        vaultName
+            .replace(/[^A-Za-z0-9.\-_:~]+/g, '-')
+            .replace(/-{2,}/g, '-')
+    }:${
         filepath
             // regex excludes : and ~ because we use those as control characters
-            .replace(/[^A-Za-z0-9.\-_]/g, $$ => {
+            .replace(/[^A-Za-z0-9._]/g, $$ => {
                 if ($$ == '\\' || $$ == '/') {
                     return ':';
                 } else {
-                    return '~' + $$.charCodeAt(0).toString(16).padStart(4, '0');
+                    return '-' + $$.charCodeAt(0).toString(16).padStart(4, '0');
                 }
-            });
+            })
+    }`;
+
+    filepath = filepath.toLowerCase();
 
     if (filepath.length > 512) throw new Error('File path too long!');
 
     return filepath;
-}
-
-export function filepathFromRkey(rkey: string) {
-    return rkey
-        .replace(/:/g, '/')
-        .replace(/~([0-9a-fA-F]{4})/g, ($$, $1) => String.fromCharCode(parseInt($1, 16)));
 }

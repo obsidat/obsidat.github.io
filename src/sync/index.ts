@@ -1,5 +1,6 @@
-import { type TFile } from "obsidian";
+import type { TFile } from "obsidian";
 import { scryptToBase58Async } from "../utils";
+import { filepathToRkey } from "../filepath-to-rkey";
 
 /**
  * Metadata to be serialized as CBOR and stored in AGE encrypted form in the vault record.
@@ -37,7 +38,7 @@ export interface VaultsVault {
 
 export function getPublicFileRkey(file: TFile | { path: string, vaultName: string }): string {
     // lowercase for case-insensitive file naming
-    return `${'vaultName' in file ? file.vaultName : file.vault.getName()}:${file.path}`.toLowerCase();
+    return filepathToRkey('vaultName' in file ? file.vaultName : file.vault.getName(), file.path);
 }
 
 export async function getVaultRkey(vaultName: string, passphrase: string) {

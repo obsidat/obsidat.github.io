@@ -6,17 +6,18 @@ import { detectMimeType } from '@parent/utils';
 import { decode as decodeCbor } from 'cbor-x';
 import type { FileMetadata } from '@parent/sync';
 import { fromCbor } from '@parent/utils/cbor';
+import { KittyAgent } from '@parent/utils/kitty-agent';
 
 export class ApiClient {
     private constructor(
         private readonly did: At.DID,
         private readonly handle: string,
-        private readonly pdsAgent: XRPC,
+        private readonly pdsAgent: KittyAgent,
     ) {}
 
     static async create(handle: string) {
         const manager = new CredentialManager({ service: 'https://bsky.social' });
-        const agent = new XRPC({ handler: manager });
+        const agent = new KittyAgent({ handler: manager });
         
         const actorInfo = await getActorInfo(agent, handle);
 
@@ -27,15 +28,16 @@ export class ApiClient {
     async getFile(rkey: string, passphrase: string): Promise<{ uri: string; value: IoGithubObsidatFile.Record; }>
     
     async getFile(rkey: string, passphrase?: string): Promise<{ uri: string; value: (IoGithubObsidatFile.Record | IoGithubObsidatPublicFile.Record); }> {
-        const output = await this.pdsAgent.get('com.atproto.repo.getRecord', {
-            params: {
-                collection: passphrase !== undefined ? 'io.github.obsidat.file' : 'io.github.obsidat.publicFile',
-                repo: this.did,
-                rkey
-            }
+        const output = await this.pdsAgent.get({
+            collection: passphrase !== undefined ? 'io.github.obsidat.file' : 'io.github.obsidat.publicFile',
+            repo: this.did,
+            rkey
         });
     
-        return { uri: output.data.uri, value: output.data.value as (IoGithubObsidatFile.Record | IoGithubObsidatPublicFile.Record) };
+        return {
+            uri: output.uri,
+            value: output.value as (IoGithubObsidatFile.Record | IoGithubObsidatPublicFile.Record)
+        };
     }
     
     async getAndDecryptFile(rkey: string, passphrase?: string) {

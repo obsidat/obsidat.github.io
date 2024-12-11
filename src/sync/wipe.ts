@@ -3,6 +3,7 @@ import MyPlugin from "..";
 import { chunks, rkey } from "../utils";
 import { KittyAgent } from "../utils/kitty-agent";
 import { getVaultMetadata } from "./vault-metadata";
+import { Notice } from "obsidian";
 
 export async function doWipe(agent: KittyAgent, plugin: MyPlugin) {
     const { app, settings } = plugin;
@@ -21,7 +22,7 @@ export async function doWipe(agent: KittyAgent, plugin: MyPlugin) {
     // const blobs = filteredRecrods
     //     .map(e => e.value.body.ref.$link);
 
-    console.log(`Deleting ${filteredRecords.length} records.`);
+    new Notice(`Deleting ${filteredRecords.length} pages.`);
 
     const deletes = filteredRecords.map(e => ({
         $type: 'com.atproto.repo.applyWrites#delete',
@@ -35,4 +36,6 @@ export async function doWipe(agent: KittyAgent, plugin: MyPlugin) {
             writes: chunk
         });
     }
+    
+    new Notice(`Deleted ${filteredRecords.length} pages.`);
 }

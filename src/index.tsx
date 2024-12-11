@@ -214,12 +214,16 @@ export default class MyPlugin extends Plugin {
                         allResolvedLinks[link] ??= 0;
                         allResolvedLinks[link] += resolvedLinks[link];
 
-                        const subResolvedLinks = this.app.metadataCache.resolvedLinks[link];
-                        recurseLinks(subResolvedLinks, allResolvedLinks);
+                        if (link.endsWith('.md')) {
+                            const subResolvedLinks = this.app.metadataCache.resolvedLinks[link];
+                            recurseLinks(subResolvedLinks, allResolvedLinks);
+                        }
                     }
 
                     return allResolvedLinks;
                 };
+
+                console.log(this.app.metadataCache.resolvedLinks, activeFile.path);
 
                 const allResolvedLinks = recurseLinks(
                     this.app.metadataCache.resolvedLinks[activeFile.path],
@@ -275,7 +279,7 @@ export default class MyPlugin extends Plugin {
                         reject();
                     }).open();
                 }).then(async () => {
-                    await doShare(await this.agent, this.app, this, this.settings, Object.keys(allResolvedLinks));
+                    await doShare(await this.agent, this, Object.keys(allResolvedLinks), fileView as MarkdownView);
                 });
             }
         });

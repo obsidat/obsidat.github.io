@@ -3,7 +3,7 @@ import type { At, IoGithubObsidatFile, IoGithubObsidatPublicFile } from "@atcute
 import { decryptData, encryptData } from "../encryption";
 import { arrayBufferToBase64, base64ToArrayBuffer, splitFirst } from ".";
 import { getPdsEndpoint, type DidDocument } from "@atcute/client/utils/did";
-import { type TFile } from "obsidian";
+import type { TFile } from "obsidian";
 import type { KittyAgent } from "./kitty-agent";
 
 export async function encryptBlob(data: ArrayBufferLike, passphrase: string): Promise<Blob> {
